@@ -31,7 +31,7 @@ Additionally, the LED array displays different patterns to indicate system state
 | **Sensor Error** | LEDs 1-2 lit (red) | Displayed if sensor fails to respond after retries |
 | **LED Error** | n/a | LED array nonfunctional, LCD indicates system error |
 | **LCD Error** | LEDs 2-4 lit (red) | Displayed if LCD display fails to respond after retries |
-<br>
+
 ### LCD Display Behavior
 The two-line LCD Display shows the indoor humidity in numerals, system status updates, and error messages.
 
