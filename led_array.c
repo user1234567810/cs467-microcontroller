@@ -28,32 +28,6 @@ GPIO 2 (pin 4) -> DIN (data in) on LED strip
 GND  (pin 38)  -> Ground rail (-) -> GND on LED strip
 */
 
-
-/*
---Outline--
-
-Functions:
-
-led_array_init()
-
-humidity_to_leds(humidity):
-    - Convert humidity percentage (0-100) to LED count (0-8)
-    - Return number of LEDs to light
-
-led_array_set(num_leds):
-    - Humidity visualization (lights num of LEDs from humidity_to_leds)
-
-led_array_show_loading():
-    - Loading visualization (cycle through LEDs)
-
-led_array_show_error(code):
-    - Error visualization (blinking red)
-
-Testing:
-    - Use mock humidity values
-    - Will make temp main.c for local testing
-*/
-
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
@@ -197,10 +171,12 @@ static void show_error(uint8_t code, uint32_t ms_total) {
 
 // Test main
 int main(void) {
+    stdio_init_all();
+    if (!led_array_init()) return 1;
+
+    show_loading(2000);
+
     while (true) {
-        stdio_init_all();
-        if (!led_array_init()) return 1;
-        show_loading(2000);
         // Fake humidity values
         float tests[] = {0, 5, 12.5, 25, 37.5, 50, 62.5, 75, 87.5, 100};
         int n = sizeof(tests) / sizeof(tests[0]);
@@ -212,11 +188,9 @@ int main(void) {
                 sleep_ms(400);
             }
         }
-        show_error(3, 2000);
-        show_loading(2000);
-        show_error(6, 2000);
-        show_loading(2000);
-        show_error(8, 2000);
-        show_loading(2000);
+        for (int i = 2; i <= 8; i*=2) {
+            show_error(i, 2000);
+            show_loading(2000);
+        } 
     }
 }
