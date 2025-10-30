@@ -35,7 +35,7 @@ GND  (pin 38)  -> Ground rail (-) -> GND on LED strip
 
 Functions:
 
-
+led_array_init()
 
 humidity_to_leds(humidity):
     - Convert humidity percentage (0-100) to LED count (0-8)
@@ -51,12 +51,10 @@ led_array_show_error(code):
     - Error visualization (blinking red)
 
 Testing:
-    - Start in placeholder mode (no hardware)
     - Use mock humidity values
     - Will make temp main.c for local testing
 */
 
-// Import modules
 #include <stdio.h>
 #include "pico/stdlib.h"
 #include "hardware/pio.h"
@@ -98,7 +96,7 @@ static void hw_set_pixel(uint8_t i, uint8_t r, uint8_t g, uint8_t b) {
         led_buf[i] = pack_grb(r, g, b);
 }
 
-// Load ws2812 control program to PIO, claim state machine,
+// Load ws2812 control program to PIO, claim unused state machine,
 // set timing to 800 kHz (required for ws2812 LEDs)
 static bool led_array_init(void) {
     uint offset = pio_add_program(pio, &ws2812_program);
@@ -108,13 +106,61 @@ static bool led_array_init(void) {
     return true;
 }
 
-int main(void){
+// Convert humidity percentage (0–100) to LEDs (0-8)
+static uint8_t humidity_to_leds(float h) {
+    if (h < 0)
+        h = 0;
+    if (h > 100)
+        h = 100;
+    // How much humidity each LED represents
+    float step = 100.0f / (float)LED_COUNT;
+    // How many LEDs should be on
+    uint8_t n = (uint8_t)((h + step / 2.0f) / step);
+    if (n > LED_COUNT)
+        n = LED_COUNT;
+    return n;
+}
 
-    // Test, set first LED to red
-    stdio_init_all();
-    if(!led_array_init()) return 1;
-    hw_clear();
-    hw_set_pixel(0, 255, 0, 0);
+// Sets lit LEDs to blue
+static void set_color(uint8_t idx, uint8_t lit, uint8_t *r, uint8_t *g, uint8_t *b) {
+    *r = 0;
+    *g = 0;
+    *b = 255;
+}
+
+// Turn on given number of LEDs and turn off rest
+static void led_array_set(uint8_t leds_on) {
+    if (leds_on > LED_COUNT)
+        leds_on = LED_COUNT;
+    for (uint8_t i = 0; i < LED_COUNT; i++) {
+        if (i < leds_on) {
+            // Pick and set color if LED supposed to be on
+            uint8_t r, g, b;
+            set_color(i, leds_on, &r, &g, &b);
+            hw_set_pixel(i, r, g, b);
+        }
+        else {
+            // Turn LED off
+            hw_set_pixel(i, 0, 0, 0);
+        }
+    }
     hw_show();
-    while(1) tight_loop_contents();
+}
+
+int main(void) {
+    stdio_init_all();
+    if (!led_array_init()) return 1;
+
+    // Fake humidity values
+    float tests[] = {0, 5, 12.5, 25, 37.5, 50, 62.5, 75, 87.5, 100};
+    int n = sizeof(tests) / sizeof(tests[0]);
+
+    while (true) {
+        for (int i = 0; i < n; ++i) {
+            float h = tests[i];
+            uint8_t leds_on = humidity_to_leds(h);
+            led_array_set(leds_on);
+            sleep_ms(400);
+        }
+    }
 }
