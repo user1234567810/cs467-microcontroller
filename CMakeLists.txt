@@ -42,7 +42,10 @@ add_executable(humidity_sensor
 )
 
 # Link the executable with Pico standard library and hardware libraries
-target_link_libraries(humidity_sensor pico_stdlib hardware_gpio hardware_i2c)
+target_link_libraries(humidity_sensor 
+    pico_stdlib 
+    hardware_gpio 
+    hardware_i2c )
 
 # Generate extra output files (e.g., .uf2 for flashing the Pico)
 pico_add_extra_outputs(humidity_sensor)
