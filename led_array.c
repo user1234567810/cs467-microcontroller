@@ -17,7 +17,6 @@ Responsibilities:
 - Initialize and configure the LED array
 - Light LEDs based on humidity levels given by the sensor
 - Display loading and error animations for debugging and status indication
-- Support placeholder testing
 
 Requires the following modules:
 - led_array.h: for interface definitions
@@ -56,6 +55,8 @@ Testing:
 */
 
 #include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include "pico/stdlib.h"
 #include "hardware/pio.h"
 #include "hardware/clocks.h"
@@ -147,9 +148,29 @@ static void led_array_set(uint8_t leds_on) {
     hw_show();
 }
 
+// Loading visualization
+static void show_loading(uint32_t ms_total) {
+
+    uint32_t start_time = to_ms_since_boot(get_absolute_time());
+
+    while (to_ms_since_boot(get_absolute_time()) - start_time < ms_total) {
+        uint32_t elapsed = to_ms_since_boot(get_absolute_time()) / 60;
+        int position = elapsed % (LED_COUNT * 2 - 2);
+        if (position >= LED_COUNT)
+            position = (LED_COUNT * 2 - 2) - position;
+        for (uint8_t i = 0; i < LED_COUNT; i++)
+            hw_set_pixel(i, 0, 0, 0);
+        hw_set_pixel(position, 255, 255, 0);
+        hw_show();
+        sleep_ms(16);
+    }
+}
+
 int main(void) {
     stdio_init_all();
     if (!led_array_init()) return 1;
+
+    show_loading(2000);
 
     // Fake humidity values
     float tests[] = {0, 5, 12.5, 25, 37.5, 50, 62.5, 75, 87.5, 100};
