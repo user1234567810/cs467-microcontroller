@@ -25,6 +25,10 @@ GPIO 7 (pin 10) -> SCL on DHT20
 GND (pin 38) -> GND on DHT20
 */
 
+// Modes
+// Change the Boolean to switch the meaning of the blinking pattern
+bool BLINK_AFTER_INIT = false;
+
 // Commands
 // #ifndef LED_DELAY_MS
 #define LED_DELAY_MS 250
@@ -127,9 +131,23 @@ int main() {
     // printf("Printing something now\n");
     hard_assert(rc == PICO_OK);
     while (true) {
-        pico_set_led(true);
-        sleep_ms(LED_DELAY_MS);
-        pico_set_led(false);
-        sleep_ms(LED_DELAY_MS);
+        // Blink after successful DHT & LED initialization
+        if (BLINK_AFTER_INIT) {
+            pico_set_led(true);
+            sleep_ms(LED_DELAY_MS);
+            pico_set_led(false);
+            sleep_ms(LED_DELAY_MS);
+        }
+
+        // Read after successful DHT & LED initialization
+        if (!BLINK_AFTER_INIT) {
+            dht_reading reading;
+            read_from_dht(&reading);
+            float fahrenheit = (reading.temp_celsius * 9 / 5) + 32;
+            printf("Humidity = %.1f%%, Temperature = %.1fC (%.1fF)\n",
+               reading.humidity, reading.temp_celsius, fahrenheit);
+
+            sleep_ms(2000);
+        }
     }
 }
