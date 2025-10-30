@@ -67,24 +67,6 @@ typedef struct {
     float temp_celsius;
 } dht_reading;
 
-// // Initialize DHT20 sensor
-// int dht20_status = 0;
-// int *dht20_status_pointer = &dht20_status;
-// bool dht20_init(void) {
-//     // Initialize I2C
-//     i2c_init(I2C_PORT, I2C_FREQ);
-//     gpio_set_function(I2C_SDA_PIN, GPIO_FUNC_I2C);
-//     gpio_set_function(I2C_SCL_PIN, GPIO_FUNC_I2C);
-//     gpio_pull_up(I2C_SDA_PIN);
-//     gpio_pull_up(I2C_SCL_PIN);
-
-//     // Give sensor time to wake up
-//     // sleep_ms(100);
-
-//     // Check if it has initialized
-//     // i2c_read_blocking(I2C_PORT, DHT20_I2C_ADDR, dht20_status_pointer, 1, false);
-// }
-
 // Get a reading from the DHT20 sensor
 void read_from_dht(dht_reading *result) {
     int data[5] = {0, 0, 0, 0, 0};
@@ -141,10 +123,6 @@ void pico_set_led(bool led_on) {
 int main() {
     int dht_init_status = dht_init();
     hard_assert(dht_init_status == 1);
-    // stdio_init_all();
-    // gpio_init(DHT_PIN);
-    // gpio_init(PICO_DEFAULT_LED_PIN);
-    // gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
     int rc = pico_led_init();
     // printf("Printing something now\n");
     hard_assert(rc == PICO_OK);
