@@ -70,7 +70,7 @@ static int sm = -1;
 static uint32_t led_buf[LED_COUNT];
 
 // Pack RGB into GRB order
-static inline uint32_t urgb_u32(uint8_t r, uint8_t g, uint8_t b) {
+static inline uint32_t pack_grb(uint8_t r, uint8_t g, uint8_t b) {
     return
         ((uint32_t) (r) << 8) |
         ((uint32_t) (g) << 16) |
@@ -166,22 +166,57 @@ static void show_loading(uint32_t ms_total) {
     }
 }
 
+// Error visualization
+static void show_error(uint8_t code, uint32_t ms_total) {
+
+    uint32_t start_time = to_ms_since_boot(get_absolute_time());
+
+    while (to_ms_since_boot(get_absolute_time()) - start_time < ms_total) {
+
+        uint8_t leds_to_light = code;
+        if (leds_to_light > LED_COUNT)
+            leds_to_light = LED_COUNT;
+
+        // Turn off all LEDs
+        for (uint8_t i = 0; i < LED_COUNT; i++)
+            hw_set_pixel(i, 0, 0, 0);
+
+        // Light up all 'leds_to_light' LEDs in red
+        for (uint8_t i = 0; i < leds_to_light; i++)
+            hw_set_pixel(i, 255, 0, 0);
+
+        // Show the pattern
+        hw_show();
+        sleep_ms(180);
+
+        // Turn off pattern
+        hw_clear();
+        sleep_ms(180);
+    }
+}
+
+// Test main
 int main(void) {
-    stdio_init_all();
-    if (!led_array_init()) return 1;
-
-    show_loading(2000);
-
-    // Fake humidity values
-    float tests[] = {0, 5, 12.5, 25, 37.5, 50, 62.5, 75, 87.5, 100};
-    int n = sizeof(tests) / sizeof(tests[0]);
-
     while (true) {
-        for (int i = 0; i < n; ++i) {
-            float h = tests[i];
-            uint8_t leds_on = humidity_to_leds(h);
-            led_array_set(leds_on);
-            sleep_ms(400);
+        stdio_init_all();
+        if (!led_array_init()) return 1;
+        show_loading(2000);
+        // Fake humidity values
+        float tests[] = {0, 5, 12.5, 25, 37.5, 50, 62.5, 75, 87.5, 100};
+        int n = sizeof(tests) / sizeof(tests[0]);
+        for (int i = 0; i < 2; ++i) {
+            for (int i = 0; i < n; ++i) {
+                float h = tests[i];
+                uint8_t leds_on = humidity_to_leds(h);
+                led_array_set(leds_on);
+                sleep_ms(400);
+            }
         }
+        show_error(3, 2000);
+        show_loading(2000);
+        show_error(6, 2000);
+        show_loading(2000);
+        show_error(8, 2000);
+        show_loading(2000);
     }
 }
