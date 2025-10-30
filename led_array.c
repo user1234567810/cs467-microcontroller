@@ -169,7 +169,11 @@ static void show_error(uint8_t code, uint32_t ms_total) {
     }
 }
 
-// Test main
+// ---------------------------------------------------------------------------
+// Temporary test main()
+// This allows led_array.c to compile and run independently for testing
+// Remove before integrating with the actual project main.c
+// ---------------------------------------------------------------------------
 int main(void) {
     stdio_init_all();
     if (!led_array_init()) return 1;
