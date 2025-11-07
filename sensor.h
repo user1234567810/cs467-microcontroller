@@ -26,6 +26,11 @@ Description: Provides interface for structures, functions, and constants for
 #ifndef SENSOR_H
 #define SENSOR_H
 
+// THESE VALUES CAN BE UPDATED
+// Mode: Change the boolean to switch the blinking DHT status indicator
+bool BLINK_AFTER_INIT = false;
+const uint SLEEP_TIME = 20;
+
 // Structures
 // Create a structure for the DHT20 sensor data (Adapted from DHT example code)
 typedef struct {
@@ -46,17 +51,14 @@ void pico_set_led(bool led_on);
 #define DHT20_CMD_TRIGGER 0xAC
 #define DHT20_CMD_SOFT_RESET 0xBA
 
-// Mode: Change the boolean to switch the blinking DHT status indicator
-bool BLINK_AFTER_INIT = false;
-
-// Constants (Adapted from DHT example code)
-const uint DHT_PIN = 15;
-const uint MAX_TIMINGS = 85;
-
 // Configure I2C
 #define I2C_PORT i2c0
 #define I2C_SDA_PIN 9
 #define I2C_SCL_PIN 10
 #define I2C_FREQ 400000
+
+// Constants (Adapted from DHT example code)
+const uint DHT_PIN = 15;
+const uint MAX_TIMINGS = 85;
 
 #endif

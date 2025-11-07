@@ -74,7 +74,7 @@ void read_from_dht(dht_reading *result) {
     // Set the DHT pin to send output, send an init signal (0), then wait
     gpio_set_dir(DHT_PIN, GPIO_OUT);
     gpio_put(DHT_PIN, 0);
-    sleep_ms(20);
+    sleep_ms(SLEEP_TIME);
 
     // Set the DHT pin to receive input
     gpio_set_dir(DHT_PIN, GPIO_IN);
