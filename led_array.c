@@ -18,9 +18,6 @@ Responsibilities:
 - Light LEDs based on humidity levels given by the sensor
 - Display loading and error animations for debugging and status indication
 
-Requires the following modules:
-- led_array.h: for interface definitions
-
 Wiring configuration
 ** WS2812 RGB 8 LED Strip **
 GPIO 2 (pin 4) -> DIN (data in) on LED strip
@@ -28,9 +25,9 @@ GPIO 2 (pin 4) -> DIN (data in) on LED strip
 GND  (pin 38)  -> Ground rail (-) -> GND on LED strip
 */
 
-#include <stdio.h>
-#include <stdint.h>
-#include <stdbool.h>
+#include <stdio.h>          // Temp: Remove when integrated with main.c
+#include <stdint.h>         // Temp: Move to led_array.h during integration
+#include <stdbool.h>        // Temp: Move to led_array.h during integration
 #include "pico/stdlib.h"
 #include "hardware/pio.h"
 #include "hardware/clocks.h"
@@ -39,9 +36,9 @@ GND  (pin 38)  -> Ground rail (-) -> GND on LED strip
 #define LED_PIN    2
 #define LED_COUNT  8
 
-static PIO pio = pio0;
-static int sm = -1;
-static uint32_t led_buf[LED_COUNT];
+static PIO pio = pio0;      // PIO block used to drive LEDs
+static int sm = -1;         // State machine index for LED control
+static uint32_t led_buf[LED_COUNT]; // Buffer holding LED color data
 
 // Pack RGB into GRB order
 static inline uint32_t pack_grb(uint8_t r, uint8_t g, uint8_t b) {
