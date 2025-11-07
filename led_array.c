@@ -18,6 +18,9 @@ Responsibilities:
 - Light LEDs based on humidity levels given by the sensor
 - Display loading and error animations for debugging and status indication
 
+Requires the following modules:
+- led_array.h: for interface definitions
+
 Wiring configuration
 ** WS2812 RGB 8 LED Strip **
 GPIO 2 (pin 4) -> DIN (data in) on LED strip
