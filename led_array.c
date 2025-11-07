@@ -25,9 +25,7 @@ GPIO 2 (pin 4) -> DIN (data in) on LED strip
 GND  (pin 38)  -> Ground rail (-) -> GND on LED strip
 */
 
-#include <stdio.h>          // Temp: Remove when integrated with main.c
-#include <stdint.h>         // Temp: Move to led_array.h during integration
-#include <stdbool.h>        // Temp: Move to led_array.h during integration
+#include "led_array.h"
 #include "pico/stdlib.h"
 #include "hardware/pio.h"
 #include "hardware/clocks.h"
@@ -68,18 +66,27 @@ static void hw_clear(void) {
     hw_show();
 }
 
-// Load ws2812 control program to PIO, claim unused state machine,
-// set timing to 800 kHz (required for ws2812 LEDs)
-static bool led_array_init(void) {
+bool led_array_init(void) {
+    // Load PIO program
     uint offset = pio_add_program(pio, &ws2812_program);
-    sm = pio_claim_unused_sm(pio, true);
+    if (offset == (uint)-1) {
+        return false;
+    }
+    // Claim unused state machine
+    sm = pio_claim_unused_sm(pio, false);
+    if (sm < 0) {
+        return false;
+    }
+    // Initialize WS2812 driver at 800 kHz
     ws2812_program_init(pio, sm, offset, LED_PIN, 800000, false);
+
+    //  Clear all LEDs to start
     hw_clear();
     return true;
 }
 
 // Convert humidity percentage (0–100) to LEDs (0-8)
-static uint8_t humidity_to_leds(float h) {
+uint8_t humidity_to_leds(float h) {
     if (h < 0)
         h = 0;
     if (h > 100)
@@ -94,31 +101,35 @@ static uint8_t humidity_to_leds(float h) {
 }
 
 // Turn on given number of LEDs and turn off rest
-static void led_array_set(uint8_t leds_on) {
+void led_array_set(uint8_t leds_on) {
     if (leds_on > LED_COUNT)
         leds_on = LED_COUNT;
     for (uint8_t i = 0; i < LED_COUNT; i++) {
         if (i < leds_on) {
-            hw_set_pixel(i, 0, 0, 255);
+            hw_set_pixel(i, 0, 0, 255); // on
         }
         else {
-            // Turn LED off
-            hw_set_pixel(i, 0, 0, 0);
+            hw_set_pixel(i, 0, 0, 0);   // off
         }
     }
     hw_show();
 }
 
 // Loading visualization
-static void show_loading(uint32_t ms_total) {
+void led_show_loading(uint32_t ms_total) {
 
     uint32_t start_time = to_ms_since_boot(get_absolute_time());
 
+    // Run visualization until total duration elapsed
     while (to_ms_since_boot(get_absolute_time()) - start_time < ms_total) {
+
+        // Compute current position of moving LED
         uint32_t elapsed = to_ms_since_boot(get_absolute_time()) / 60;
         int position = elapsed % (LED_COUNT * 2 - 2);
         if (position >= LED_COUNT)
             position = (LED_COUNT * 2 - 2) - position;
+
+        // Clear strip, light a yellow LED, update strip
         for (uint8_t i = 0; i < LED_COUNT; i++)
             hw_set_pixel(i, 0, 0, 0);
         hw_set_pixel(position, 255, 255, 0);
@@ -128,7 +139,7 @@ static void show_loading(uint32_t ms_total) {
 }
 
 // Error visualization
-static void show_error(uint8_t code, uint32_t ms_total) {
+void led_show_error(uint8_t code, uint32_t ms_total) {
 
     uint32_t start_time = to_ms_since_boot(get_absolute_time());
 
@@ -153,36 +164,5 @@ static void show_error(uint8_t code, uint32_t ms_total) {
         // Turn off pattern
         hw_clear();
         sleep_ms(180);
-    }
-}
-
-// ---------------------------------------------------------------------------
-// Temporary test main()
-// This allows led_array.c to compile and run independently for testing
-// Remove before integrating with the actual project main.c
-// ---------------------------------------------------------------------------
-int main(void) {
-    stdio_init_all();
-    if (!led_array_init()) return 1;
-
-    show_loading(2000);
-
-    while (true) {
-        // Fake humidity values
-        float tests[] = {0, 5, 12.5, 25, 37.5, 50, 62.5, 75, 87.5, 100};
-        int n = sizeof(tests) / sizeof(tests[0]);
-        for (int i = 0; i < 2; ++i) {
-            for (int i = 0; i < n; ++i) {
-                float h = tests[i];
-                uint8_t leds_on = humidity_to_leds(h);
-                led_array_set(leds_on);
-                sleep_ms(400);
-            }
-        }
-        // Shows visualization for error code 2, 4 and 8
-        for (int i = 2; i <= 8; i*=2) {
-            show_error(i, 2000);
-            show_loading(2000);
-        } 
     }
 }
