@@ -51,6 +51,12 @@ static inline uint32_t pack_grb(uint8_t r, uint8_t g, uint8_t b) {
         (uint32_t) (b);
 }
 
+// Writes color into memory buffer
+static void hw_set_pixel(uint8_t i, uint8_t r, uint8_t g, uint8_t b) {
+    if (i < LED_COUNT)
+        led_buf[i] = pack_grb(r, g, b);
+}
+
 // Send colors from memory buffer to LED strip
 static void hw_show(void) {
     for (int i = 0; i < LED_COUNT; ++i)
@@ -63,12 +69,6 @@ static void hw_clear(void) {
     for (int i = 0; i < LED_COUNT; ++i)
         led_buf[i] = 0;
     hw_show();
-}
-
-// Writes color into memory buffer
-static void hw_set_pixel(uint8_t i, uint8_t r, uint8_t g, uint8_t b) {
-    if (i < LED_COUNT)
-        led_buf[i] = pack_grb(r, g, b);
 }
 
 // Load ws2812 control program to PIO, claim unused state machine,
@@ -96,23 +96,13 @@ static uint8_t humidity_to_leds(float h) {
     return n;
 }
 
-// Sets lit LEDs to blue
-static void set_color(uint8_t idx, uint8_t lit, uint8_t *r, uint8_t *g, uint8_t *b) {
-    *r = 0;
-    *g = 0;
-    *b = 255;
-}
-
 // Turn on given number of LEDs and turn off rest
 static void led_array_set(uint8_t leds_on) {
     if (leds_on > LED_COUNT)
         leds_on = LED_COUNT;
     for (uint8_t i = 0; i < LED_COUNT; i++) {
         if (i < leds_on) {
-            // Pick and set color if LED supposed to be on
-            uint8_t r, g, b;
-            set_color(i, leds_on, &r, &g, &b);
-            hw_set_pixel(i, r, g, b);
+            hw_set_pixel(i, 0, 0, 255);
         }
         else {
             // Turn LED off
@@ -192,6 +182,7 @@ int main(void) {
                 sleep_ms(400);
             }
         }
+        // Shows visualization for error code 2, 4 and 8
         for (int i = 2; i <= 8; i*=2) {
             show_error(i, 2000);
             show_loading(2000);
