@@ -104,7 +104,7 @@ uint8_t humidity_to_leds(float h) {
 }
 
 // Turn on given number of LEDs and turn off rest
-void led_array_set(uint8_t leds_on) {
+static void led_array_set(uint8_t leds_on) {
     if (leds_on > LED_COUNT)
         leds_on = LED_COUNT;
     for (uint8_t i = 0; i < LED_COUNT; i++) {
