@@ -3,8 +3,9 @@ File: display.c
 Language: C
 Author: Andrew Poon
 Date: 11/08/25
-Description: Provides initialization & control functionality for the
-    LCD1602 display connected to the Raspberry Pi Pico.
+Description:
+    Provides initialization & control functionality for the LCD1602 16x2 character
+    display connected to the Raspberry Pi Pico.
 
     Portions of low-level LCD command sequencing and I2C write patterns were adapted
     from the official Raspberry Pi Pico SDK LCD1602 I2C example and is licensed as
@@ -25,6 +26,6 @@ Wiring configuration
 ** LCD1602 Display **
 GPIO 6 (pin 9)  -> SDA on LCD1602
 GPIO 7 (pin 10) -> SCL on LCD1602
-3.3v (pin 36)   -> Power rail (+)  -> VCC on LCD1602
-GND (pin 38)    -> Ground rail (-) -> GND on LCD1602
+3.3v (pin 36)   -> VCC on LCD1602
+GND (pin 38)    -> GND on LCD1602
 */

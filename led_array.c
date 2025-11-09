@@ -24,8 +24,8 @@ Requires the following modules:
 Wiring configuration
 ** WS2812 RGB 8 LED Strip **
 GPIO 2 (pin 4) -> DIN (data in) on LED strip
-3.3V (pin 36)  -> Power rail (+)  -> VCC on LED strip
-GND  (pin 38)  -> Ground rail (-) -> GND on LED strip
+3.3V (pin 36)  -> VCC on LED strip
+GND  (pin 38)  -> GND on LED strip
 */
 
 #include "led_array.h"
