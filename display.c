@@ -2,7 +2,7 @@
 File: display.c
 Language: C
 Author: Andrew Poon
-Date: 11/08/25
+Date: 11/09/25
 Description:
     Provides initialization & control functionality for the LCD1602 16x2 character
     display connected to the Raspberry Pi Pico.
@@ -43,25 +43,25 @@ const int LCD_FUNCTIONSET = 0x20;
 const int LCD_SETCGRAMADDR = 0x40;
 const int LCD_SETDDRAMADDR = 0x80;
 
-// flags for display entry mode
+// Flags for display entry mode
 const int LCD_ENTRYSHIFTINCREMENT = 0x01;
 const int LCD_ENTRYLEFT = 0x02;
 
-// flags for display and cursor control
+// Flags for display and cursor control
 const int LCD_BLINKON = 0x01;
 const int LCD_CURSORON = 0x02;
 const int LCD_DISPLAYON = 0x04;
 
-// flags for display and cursor shift
+// Flags for display and cursor shift
 const int LCD_MOVERIGHT = 0x04;
 const int LCD_DISPLAYMOVE = 0x08;
 
-// flags for function set
+// Flags for function set
 const int LCD_5x10DOTS = 0x04;
 const int LCD_2LINE = 0x08;
 const int LCD_8BITMODE = 0x10;
 
-// flag for backlight control
+// Flag for backlight control
 const int LCD_BACKLIGHT = 0x08;
 
 const int LCD_ENABLE_BIT = 0x04;
@@ -74,9 +74,8 @@ const int LCD_ENABLE_BIT = 0x04;
 #define MAX_CHARS      16
 #define DELAY_US       600  // Delay in microseconds  
 
-// State set by display_init
-static i2c_inst_t *s_i2c = NULL;
-static uint8_t     s_addr = 0x27;
+static i2c_inst_t *s_i2c = NULL;   // Pointer to active I2C instance
+static uint8_t     s_addr = 0x27;  // I2C address of the LCD
 
 // Send one byte (command or data) to LCD via I2C
 static inline void i2c_write_byte(uint8_t v) {
