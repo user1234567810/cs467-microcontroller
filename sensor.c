@@ -60,7 +60,13 @@ int pico_led_init(void) {
 // Initialize DHT20 sensor (Adapted from DHT example code)
 bool dht_init(void) {
     stdio_init_all();
-    gpio_init(DHT_PIN);
+
+    // I2C initialization sequence
+    i2c_init(i2c_default, 100 * 1000); // Standard baud rate of 100 kHz
+    gpio_set_function(I2C_SDA_PIN, GPIO_FUNC_I2C);
+    gpio_set_function(I2C_SCL_PIN, GPIO_FUNC_I2C);
+    gpio_pull_up(I2C_SDA_PIN);
+    gpio_pull_up(I2C_SCL_PIN);
     return true;
 }
 
