@@ -15,6 +15,11 @@ Assumes the following modules exist:
 - sensor.c / sensor.h: for reading humidity values
 - display.c / display.h: for updating the screen display
 - led_array.c / led_array.h: for controlling the 6-stage LED array
+
+Notes:
+- sensor_init(), display_init(), led_array_init(), sensor_read_humidity(), display_show_humidity(), humidity_to_leds(), led_array_set()
+  are all assumed to be implemented in their respective modules (sensor.c/.h, display.c/.h, led_array.c/.h)
+- The HUMIDITY_CHECK_INTERVAL_MS constant can be adjusted as needed.
 */
 
 // Include standard libraries
@@ -23,10 +28,12 @@ Assumes the following modules exist:
 #include <stdint.h>
 #include <stdbool.h>
 #include "pico/stdlib.h"
+
 // Include project files
 #include "sensor.h"     // Sensor interface (placeholder)
 #include "display.h"    // Display interface (placeholder)
 #include "led_array.h"  // LED array interface (placeholder)
+
 // Constants
 // Checks every 2 seconds
 #define HUMIDITY_CHECK_INTERVAL_MS 2000
@@ -35,7 +42,7 @@ int main() {
 
     printf("Raspberry Pi Humidity Sensor: Initializing hardware...\n");
 
-    // Initialize hardware (sensor, dislay, led array)
+    // Initialize hardware (sensor, display, led array)
     if (!sensor_init()) { // sensor_init is a placeholder function and comes from sensor.c/.h
         printf("ERROR: Failed to initialize humidity sensor!\n");
         // Optionally, blink an error pattern on the LEDs here
@@ -57,7 +64,7 @@ int main() {
         // Declare variable to hold humidity value
         float humidity = 0.0f;
         // Get the humidity and store it in humidity variable.
-        // sensor_read_humidity is a placeholder function from sesnor.c/.h
+        // sensor_read_humidity is a placeholder function from sensor.c/.h
         bool sensor_ok = sensor_read_humidity(&humidity);
         // If sensor_ok is true, the read was successful
         if (sensor_ok) {
@@ -85,10 +92,3 @@ int main() {
     // Should never reach here
     return 0;
 }
-
-/*
-Notes:
-- sensor_init(), display_init(), led_array_init(), sensor_read_humidity(), display_show_humidity(), humidity_to_leds(), led_array_set()
-  are all assumed to be implemented in their respective modules (sensor.c/.h, display.c/.h, led_array.c/.h)
-- The HUMIDITY_CHECK_INTERVAL_MS constant can be adjusted as needed.
-*/
