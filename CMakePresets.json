@@ -1,0 +1,20 @@
+{
+    "version": 2,
+    "configurePresets": [
+        {
+            "name": "linux-default",
+            "displayName": "Custom configure preset",
+            "description": "Sets Unix Makefiles generator, build and install directory",
+            "generator": "Unix Makefiles",
+            "binaryDir": "${sourceDir}/out/build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}"
+            },
+            "environment": {
+                "PICO_SDK_PATH": "/usr/share/pico_sdk",
+                "PICO_EXTRAS_PATH": "/workspaces/pico-extras"
+            }
+        }
+    ]
+}
