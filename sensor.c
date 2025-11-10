@@ -6,20 +6,16 @@ Date: 10/29/25
 Description: Provides initialization & reading functionality between the
     Raspberry Pi Pico and the DHT20 humidity sensor. Currently, uses 
     different LED patterns to indicate mode & status.
-
-    This file uses the Blink example as starter code. In initialization mode,
-    the default Pico LED will use the example Blink pattern to indicate the
-    successful initialization of the default LED and the DHT20 sensor. 
     
-    This file also adapts some DHT example code. In reading mode, the default
-    Pico LED will display a slower and smaller LED flash to indicate 
-    successful reading status.
+    This file utilizes some adapted DHT example code. The default Pico 
+    LED will display a slower and smaller LED flash to indicate when it
+    is reading and processing data.
 
-    The Raspberry Pi Blink and DHT example code is licensed as follows:
+    The Raspberry Pi DHT example code is licensed as follows:
     Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
     SPDX-License-Identifier: BSD-3-Clause
 
-    Blink & DHT example code is identified in the comments preceding code 
+    DHT example code is identified in the comments preceding code 
     blocks.
 
 Responsibilities:
@@ -48,25 +44,21 @@ GND (pin 38) -> GND on DHT20
 // Import project files
 #include "sensor.h"     // Sensor interface
 
-// Initialize LED (Adapted from Blink example code)
-int pico_led_init(void) {
-#if defined(PICO_DEFAULT_LED_PIN)
-    gpio_init(PICO_DEFAULT_LED_PIN);
-    gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
-    return PICO_OK;
-#endif
-}
+// Initialize structure to hold data
+dht_reading sensor_measurement;
+dht_reading *sensor_measurement_ptr = &sensor_measurement;
 
 // Initialize DHT20 sensor (Adapted from DHT example code)
 bool dht_init(void) {
     stdio_init_all();
 
     // I2C initialization sequence
-    i2c_init(i2c_default, 100 * 1000); // Standard baud rate of 100 kHz
+    i2c_init(I2C_PORT, I2C_FREQ); // Quicker baud rate of 400 kHz
     gpio_set_function(I2C_SDA_PIN, GPIO_FUNC_I2C);
     gpio_set_function(I2C_SCL_PIN, GPIO_FUNC_I2C);
     gpio_pull_up(I2C_SDA_PIN);
     gpio_pull_up(I2C_SCL_PIN);
+
     return true;
 }
 
@@ -77,16 +69,26 @@ void read_from_dht(dht_reading *result) {
     uint previous_pin_state = 1;
     uint received_data_bits = 0;
 
-    // Set the DHT pin to send output, send an init signal (0), then wait
+    // Send an init signal (0) to the DHT sensor, then wait
     gpio_set_dir(DHT_PIN, GPIO_OUT);
     gpio_put(DHT_PIN, 0);
+    // uint8_t i2c_init_signal[3] = {0xAC, 0x33, 0x00};
+    // printf("Going to try the write blocking function now...\n");
+    // uint8_t i2c_init_signal[1] = {0x00};
+    // int result2 = i2c_write_blocking(I2C_PORT, DHT20_I2C_ADDR, i2c_init_signal, 1, false);
+    // if (result2 == PICO_ERROR_GENERIC) {
+    //     printf("PICO ERROR GENERIC\n");
+    // }
+    // i2c_write_blocking(I2C_PORT, DHT20_I2C_ADDR, i2c_init_signal, 3, false);
     sleep_ms(SLEEP_TIME);
 
+    
     // Set the DHT pin to receive input
-    gpio_set_dir(DHT_PIN, GPIO_IN);
+    // gpio_set_dir(DHT_PIN, GPIO_IN);
+    uint8_t i2c_receive_buffer[40];
 
     // Send an on command to the LED pin (indicates receiving/reading data)
-    gpio_put(PICO_DEFAULT_LED_PIN, 1);
+    printf("Reading from DHT20\n");
 
     // Loop through timing cycles
     for (uint i = 0; i < MAX_TIMINGS; i++) {
@@ -115,7 +117,7 @@ void read_from_dht(dht_reading *result) {
     }
 
     // Turns off the LED when done receiving/reading
-    gpio_put(PICO_DEFAULT_LED_PIN, 0);
+    printf("Now validating data\n");
 
     // Data validation: 40 bits received & checksum in byte 5 matches sum of 1st 4 bytes
     // NOTE: This section is all experimental until we can verify the readings with a proper print/output set up
@@ -138,38 +140,20 @@ void read_from_dht(dht_reading *result) {
     }
 }
 
-// Turn the led on or off (Adapted from the Blink example code)
-void pico_set_led(bool led_on) {
-#if defined(PICO_DEFAULT_LED_PIN)
-    gpio_put(PICO_DEFAULT_LED_PIN, led_on);
-#endif
-}
-
 int main() {
+    sleep_ms(5000);
+    printf("Good morning! Initializing DHT20.\n");
     int dht_init_status = dht_init();
     hard_assert(dht_init_status == 1);
-    // This logic adapted from the Blink example code
-    int rc = pico_led_init();
-    hard_assert(rc == PICO_OK);
     while (true) {
-        // This block adapted from the Blink example code
-        // Blink after successful DHT & LED initialization
-        if (BLINK_AFTER_INIT) {
-            pico_set_led(true);
-            sleep_ms(LED_DELAY_MS);
-            pico_set_led(false);
-            sleep_ms(LED_DELAY_MS);
-        }
-
-        // Read after successful DHT & LED initialization, slower blink pattern
-        if (!BLINK_AFTER_INIT) {
-            // Adapted from the DHT example code
-            dht_reading reading;
-            read_from_dht(&reading);
-            float fahrenheit = (reading.temp_celsius * 9 / 5) + 32;         // placeholder
-            printf("Humidity = %.1f%%, Temperature = %.1fC (%.1fF)\n",      // placeholder
-               reading.humidity, reading.temp_celsius, fahrenheit);         // placeholder
-            sleep_ms(2000);
-        }
+        // Read after successful DHT & LED initialization, blink while reading & processing data. Adapted from the DHT example code.
+        dht_reading reading;
+        sleep_ms(5000);
+        printf("Initiating the read function now...\n");
+        read_from_dht(&reading);
+        float fahrenheit = (reading.temp_celsius * 9 / 5) + 32;         // placeholder
+        printf("Humidity = %.1f%%, Temperature = %.1fC (%.1fF)\n",      // placeholder
+        reading.humidity, reading.temp_celsius, fahrenheit);         // placeholder
+        sleep_ms(2000);
     }
 }
