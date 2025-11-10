@@ -30,6 +30,9 @@ target_link_libraries(${projname}
 pico_enable_stdio_usb(${projname} 1)
 pico_enable_stdio_uart(${projname} 0)
 
-# create map/bin/hex/uf2 file in addition to ELF.
-pico_add_extra_outputs(${projname})
+# Link the executable with Pico standard library and hardware libraries
+target_link_libraries(humidity_sensor 
+    pico_stdlib 
+    hardware_gpio 
+    hardware_i2c )
 
