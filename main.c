@@ -14,7 +14,7 @@ Responsibilities:
 Assumes the following modules exist:
 - sensor.c / sensor.h: for reading humidity values
 - display.c / display.h: for updating the screen display
-- led_array.c / led_array.h: for controlling the 6-stage LED array
+- led_array.c / led_array.h: for controlling the 8-stage LED array
 
 Notes:
 - sensor_init(), display_init(), led_array_init(), sensor_read_humidity(), display_show_humidity(), humidity_to_leds(), led_array_set()
