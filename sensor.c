@@ -70,21 +70,23 @@ void read_from_dht(dht_reading *result) {
     uint received_data_bits = 0;
 
     // Send an init signal (0) to the DHT sensor, then wait
-    gpio_set_dir(DHT_PIN, GPIO_OUT);
-    gpio_put(DHT_PIN, 0);
+    // gpio_set_dir(DHT_PIN, GPIO_OUT);
+    // gpio_put(DHT_PIN, 0);
     // uint8_t i2c_init_signal[3] = {0xAC, 0x33, 0x00};
-    // printf("Going to try the write blocking function now...\n");
-    // uint8_t i2c_init_signal[1] = {0x00};
-    // int result2 = i2c_write_blocking(I2C_PORT, DHT20_I2C_ADDR, i2c_init_signal, 1, false);
-    // if (result2 == PICO_ERROR_GENERIC) {
-    //     printf("PICO ERROR GENERIC\n");
-    // }
+    printf("Going to try the write blocking function now...\n");
+    uint8_t i2c_init_signal[1] = {0x00};
+    int bytes_written = i2c_write_blocking_until(I2C_PORT, DHT20_I2C_ADDR, i2c_init_signal, 1, false, 5000);
+    if (bytes_written == PICO_ERROR_GENERIC) {
+        printf("PICO ERROR GENERIC\n");
+    } else {
+        printf("SUCCESSFULLY WROTE %d bytes!!\n", bytes_written);
+    }
     // i2c_write_blocking(I2C_PORT, DHT20_I2C_ADDR, i2c_init_signal, 3, false);
     sleep_ms(SLEEP_TIME);
 
     
     // Set the DHT pin to receive input
-    // gpio_set_dir(DHT_PIN, GPIO_IN);
+    gpio_set_dir(DHT_PIN, GPIO_IN);
     uint8_t i2c_receive_buffer[40];
 
     // Send an on command to the LED pin (indicates receiving/reading data)
@@ -141,19 +143,19 @@ void read_from_dht(dht_reading *result) {
 }
 
 int main() {
-    sleep_ms(5000);
-    printf("Good morning! Initializing DHT20.\n");
+    sleep_ms(5000);             // Give the Pico time to power up
+    printf("Initializing the DHT20 sensor.\n");
     int dht_init_status = dht_init();
     hard_assert(dht_init_status == 1);
     while (true) {
-        // Read after successful DHT & LED initialization, blink while reading & processing data. Adapted from the DHT example code.
-        dht_reading reading;
+        // Read after successful DHT initialization, print status while reading
+        // & processing data. Adapted from the DHT example code.
         sleep_ms(5000);
         printf("Initiating the read function now...\n");
-        read_from_dht(&reading);
-        float fahrenheit = (reading.temp_celsius * 9 / 5) + 32;         // placeholder
-        printf("Humidity = %.1f%%, Temperature = %.1fC (%.1fF)\n",      // placeholder
-        reading.humidity, reading.temp_celsius, fahrenheit);         // placeholder
+        read_from_dht(sensor_measurement_ptr);
+        float fahrenheit = (sensor_measurement.temp_celsius * 9 / 5) + 32;
+        printf("Humidity = %.1f%%, Temperature = %.1fC (%.1fF)\n",
+        sensor_measurement.humidity, sensor_measurement.temp_celsius, fahrenheit);
         sleep_ms(2000);
     }
 }
