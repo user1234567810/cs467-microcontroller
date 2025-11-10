@@ -3,6 +3,7 @@ File: main.c
 Language: C
 Author: Trevor Carlyle
 Date: 10/29/25
+Last Updated: 11/9/25
 Description: Entry point for the Humidity Sensor project using Raspberry Pi Pico.
 
 Responsibilities:
@@ -15,11 +16,6 @@ Assumes the following modules exist:
 - sensor.c / sensor.h: for reading humidity values
 - display.c / display.h: for updating the screen display
 - led_array.c / led_array.h: for controlling the 8-stage LED array
-
-Notes:
-- sensor_init(), display_init(), led_array_init(), sensor_read_humidity(), display_show_humidity(), humidity_to_leds(), led_array_set()
-  are all assumed to be implemented in their respective modules (sensor.c/.h, display.c/.h, led_array.c/.h)
-- The HUMIDITY_CHECK_INTERVAL_MS constant can be adjusted as needed.
 */
 
 // Include standard libraries
@@ -30,30 +26,37 @@ Notes:
 #include "pico/stdlib.h"
 
 // Include project files
-#include "sensor.h"     // Sensor interface (placeholder)
-#include "display.h"    // Display interface (placeholder)
-#include "led_array.h"  // LED array interface (placeholder)
+#include "sensor.h"     // Sensor interface (sensor.c/.h)
+#include "display.h"    // Display interface (display.c/.h)
+#include "led_array.h"  // LED array interface (led_array.c/.h)
 
 // Constants
-// Checks every 2 seconds
+// Checks every 2 seconds, can be adjusted as needed.
 #define HUMIDITY_CHECK_INTERVAL_MS 2000
 
 int main() {
+    stdio_init_all(); // Initialize stdio
 
     printf("Raspberry Pi Humidity Sensor: Initializing hardware...\n");
 
-    // Initialize hardware (sensor, display, led array)
-    if (!sensor_init()) { // sensor_init is a placeholder function and comes from sensor.c/.h
+    // Initialize the DHT20 humidity sensor (sensor.c/.h)
+    if (!dht_init()) {
         printf("ERROR: Failed to initialize humidity sensor!\n");
-        // Optionally, blink an error pattern on the LEDs here
+        // Show error pattern on LED array (led_array.c/.h)
+        led_show_error(2, 2000); // Show error code 2 for 2 seconds
         return 1;
     }
-    if (!display_init()) { // display_init is a placeholder function and comes from sensor.c/.h
-        printf("ERROR: Failed to initialize display!\n");
-        return 1;
-    }
-    if (!led_array_init()) { // led_array_init is a placeholder function and comes from sensor.c/.h
+  
+    // Initialize the display (display.c/.h)
+    // Uses I2C0, SDA=6, SCL=7, address=0x27
+    // Can't use error messages here because display_init currently returns void
+    display_init(i2c0, 6, 7, 0x27);
+  
+    // Initialize the LED array (led_array.c/.h)
+    if (!led_array_init()) {
         printf("ERROR: Failed to initialize LED array!\n");
+        // Show error pattern on LED array (led_array.c/.h)
+        led_show_error(3, 2000); // Show error code 3 for 2 seconds
         return 1;
     }
 
@@ -61,29 +64,28 @@ int main() {
 
     // Main loop
     while (true) {
-        // Declare variable to hold humidity value
-        float humidity = 0.0f;
-        // Get the humidity and store it in humidity variable.
-        // sensor_read_humidity is a placeholder function from sensor.c/.h
-        bool sensor_ok = sensor_read_humidity(&humidity);
-        // If sensor_ok is true, the read was successful
-        if (sensor_ok) {
-            // Print humidity level
-            printf("Humidity: %.1f%%\n", humidity);
+        // Structure to hold sensor readings (sensor.c/.h)
+        dht_reading reading;
+        // Read humidity and temperature from DHT20 (sensor.c/.h)
+        read_from_dht(&reading);
+        // Print humidity and temperature to serial output
+        printf("Humidity: %.1f%%, Temperature: %.1fC (%.1fF)\n",
+               reading.humidity, reading.temp_celsius,
+               (reading.temp_celsius * 9 / 5) + 32);
+      
+        // Update the LCD display (display.c/.h)
+        display_clear(); // Clear previous display
+        display_set_cursor(0, 0); // Go to the top line of display
+        char line1[17]; // Declare an array line1
+        // Format a string with the current humidity value and stores it in line1
+        snprintf(line1, sizeof(line1), "Humidity: %.1f%%", reading.humidity);
+        // Use display_print from (display.c/.h)
+        display_print(line1);
 
-            // Update numeric display
-            // display_show_humidity is a placeholder function from display.c/.h
-            display_show_humidity(humidity);
-
-            // Use LED array module to determine how many LEDs to light up
-            // humidity_to_leds and led_array_set are placeholder functions from led_array.c/.h
-            uint8_t leds_on = humidity_to_leds(humidity);
-            // light up leds_on number of leds
-            led_array_set(leds_on);
-        //If sensor_ok is false, the read was unsucessful
-        } else {
-            printf("WARNING: Failed to read humidity sensor!\n");
-        }
+        // Update the LED array (led_array.c/.h)
+        // Map humidity % to number of LEDs to light up
+        uint8_t leds_on = humidity_to_leds(reading.humidity);
+        led_array_set(leds_on);
 
         // Wait before next check
         sleep_ms(HUMIDITY_CHECK_INTERVAL_MS);
