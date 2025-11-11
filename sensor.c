@@ -27,8 +27,9 @@ Requires the following modules:
 
 Wiring configuration
 ** DHT20 Sensor **
-GPIO 6 (pin 9) -> SDA on DHT20
-GPIO 7 (pin 10) -> SCL on DHT20
+I2C0 bus
+GPIO 4 (pin 6) -> SDA on DHT20
+GPIO 5 (pin 7) -> SCL on DHT20
 3.3v (pin 36) -> VCC on DHT20
 GND (pin 38) -> GND on DHT20
 */
@@ -56,25 +57,26 @@ bool dht_init(void) {
     gpio_set_function(I2C_SCL_PIN, GPIO_FUNC_I2C);
     gpio_pull_up(I2C_SDA_PIN);
     gpio_pull_up(I2C_SCL_PIN);
+    // printf("Done with the first code block.\n");
 
     // Read status register to verify connection: To be implemented next
-    uint8_t status;
-    uint8_t status_cmd = DHT20_STATUS_COMMAND;
-    printf("Checking status register: ");
-    // int ret = i2c_write_blocking(I2C_PORT, DHT20_I2C_ADDR, &status_cmd, 1, true);
-    int write_status = i2c_write_blocking_until(I2C_PORT, DHT20_I2C_ADDR, &status_cmd, 1, true, 2000);
-    if (write_status < 0) {
-        printf("Failed to send the status command: write_status = %d\n.", write_status);
-        return false;
-    }
-    // int status_register = i2c_read_blocking(I2C_PORT, DHT20_I2C_ADDR, &status, 1, false);
-    int status_register = i2c_read_blocking_until(I2C_PORT, DHT20_I2C_ADDR, &status, 1, false, 5000);
-    if (status_register < 0) {
-        printf("DHT20 not found at address 0x%02X\n", DHT20_I2C_ADDR);
-        return false;
-    } else {
-        printf("Status ok.\n");
-    }
+    // uint8_t status;
+    // uint8_t status_cmd = DHT20_STATUS_COMMAND;
+    // printf("Checking status register: ");
+    // int write_status = i2c_write_blocking(I2C_PORT, DHT20_I2C_ADDR, &status_cmd, 1, true);
+    // int write_status = i2c_write_blocking_until(I2C_PORT, DHT20_I2C_ADDR, &status_cmd, 1, true, 2000);
+    // if (write_status < 0) {
+    //     printf("Failed to send the status command: status = %d\n.", write_status);
+    //     return false;
+    // }
+    // // int status_register = i2c_read_blocking(I2C_PORT, DHT20_I2C_ADDR, &status, 1, false);
+    // int status_register = i2c_read_blocking_until(I2C_PORT, DHT20_I2C_ADDR, &status, 1, false, 5000);
+    // if (status_register < 0) {
+    //     printf("DHT20 not found at address 0x%02X\n", DHT20_I2C_ADDR);
+    //     return false;
+    // } else {
+    //     printf("Status ok.\n");
+    // }
 
     return true;
 }
