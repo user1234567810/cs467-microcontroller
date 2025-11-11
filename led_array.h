@@ -25,11 +25,11 @@ Description: Provides the public interface for controlling the WS2812
 bool led_array_init(void);
 
 /**
- * @brief Convert a humidity percentage to number of LEDs to light
+ * @brief Display humidity representation on LED strip
  *
- * Used to map sensor readings to LED visual output
+ * Converts a humidity reading into a number of LEDs and
+ * updates the LED strip to illuminate those LEDs.
  * @param humidity Relative humidity percentage (0.0–100.0)
- * @return Number of LEDs to illuminate (0–8)
  */
 void humidity_to_leds(float humidity);
 
