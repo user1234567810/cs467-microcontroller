@@ -42,14 +42,10 @@ void read_from_dht(dht_reading *result);
 #define DHT20_CMD_BYTE_1 0x33
 #define DHT20_CMD_BYTE_2 0x00
 
-// Configure I2C
+// Configure I2C for DHT20 sensor
 #define I2C_PORT i2c1           // We should make sure this doesn't conflict with the LCD settings
 #define I2C_SDA_PIN 6
 #define I2C_SCL_PIN 7
 #define I2C_FREQ 100000         // Baud rate
-
-// Constants (Adapted from DHT example code)
-const uint DHT_PIN = 15;
-const uint MAX_TIMINGS = 85;
 
 #endif
