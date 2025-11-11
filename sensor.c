@@ -59,7 +59,14 @@ bool dht_init(void) {
 
     // Read status register to verify connection: To be implemented next
     uint8_t status;
+    uint8_t status_cmd = DHT20_STATUS_COMMAND;
     printf("Checking status register: ");
+    // int ret = i2c_write_blocking(I2C_PORT, DHT20_I2C_ADDR, &status_cmd, 1, true);
+    int write_status = i2c_write_blocking_until(I2C_PORT, DHT20_I2C_ADDR, &status_cmd, 1, true, 2000);
+    if (write_status < 0) {
+        printf("Failed to send the status command: write_status = %d\n.", write_status);
+        return false;
+    }
     // int status_register = i2c_read_blocking(I2C_PORT, DHT20_I2C_ADDR, &status, 1, false);
     int status_register = i2c_read_blocking_until(I2C_PORT, DHT20_I2C_ADDR, &status, 1, false, 5000);
     if (status_register < 0) {
