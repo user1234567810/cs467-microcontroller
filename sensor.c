@@ -46,7 +46,7 @@ GND (pin 38) -> GND on DHT20
 #include "sensor.h"     // Sensor interface
 
 // Initialize DHT20 sensor
-bool dht_init(void) {
+bool sensor_init(void) {
     printf("Initializing the DHT20 sensor.\n");
     i2c_init(I2C_PORT, I2C_FREQ);
     gpio_set_function(I2C_SDA_PIN, GPIO_FUNC_I2C);
@@ -109,7 +109,7 @@ int main() {
     dht_reading *sensor_measurement_ptr = &sensor_measurement;
 
     // Initialize DHT20 sensor
-    int dht_init_status = dht_init();
+    int dht_init_status = sensor_init();
     if (dht_init_status == 0) {
         printf("The sensor did not initialize successfully. Please restart.\n");
         return 1;

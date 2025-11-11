@@ -33,7 +33,7 @@ typedef struct {
 } dht_reading;
 
 // Function prototypes
-bool dht_init(void);
+bool sensor_init(void);
 void read_from_dht(dht_reading *result);
 float get_humidity(dht_reading *result);
 
