@@ -31,7 +31,7 @@ bool led_array_init(void);
  * @param humidity Relative humidity percentage (0.0–100.0)
  * @return Number of LEDs to illuminate (0–8)
  */
-uint8_t humidity_to_leds(float humidity);
+void humidity_to_leds(float humidity);
 
 /**
  * @brief Display a loading "ping pong" animation pattern
@@ -39,7 +39,7 @@ uint8_t humidity_to_leds(float humidity);
  * Useful for initialization and booting states
  * @param ms_total Duration in milliseconds
  */
-void led_show_loading(uint32_t ms_total);
+void led_array_show_loading(uint32_t ms_total);
 
 /**
  * @brief Display error pattern based on error code
@@ -48,6 +48,6 @@ void led_show_loading(uint32_t ms_total);
  * @param code Error code
  * @param ms_total Duration in milliseconds
  */
-void led_show_error(uint8_t code, uint32_t ms_total);
+void led_array_show_error(uint8_t code, uint32_t ms_total);
 
 #endif  // LED_ARRAY_H

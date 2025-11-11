@@ -88,21 +88,6 @@ bool led_array_init(void) {
     return true;
 }
 
-// Convert humidity percentage (0–100) to LEDs (0-8)
-uint8_t humidity_to_leds(float h) {
-    if (h < 0)
-        h = 0;
-    if (h > 100)
-        h = 100;
-    // How much humidity each LED represents
-    float step = 100.0f / (float)LED_COUNT;
-    // How many LEDs should be on
-    uint8_t n = (uint8_t)((h + step / 2.0f) / step);
-    if (n > LED_COUNT)
-        n = LED_COUNT;
-    return n;
-}
-
 // Turn on given number of LEDs and turn off rest
 static void led_array_set(uint8_t leds_on) {
     if (leds_on > LED_COUNT)
@@ -118,8 +103,23 @@ static void led_array_set(uint8_t leds_on) {
     hw_show();
 }
 
+// Convert humidity percentage (0–100) to LEDs (0-8)
+void humidity_to_leds(float humidity) {
+    if (humidity < 0)
+        humidity = 0;
+    if (humidity > 100)
+        humidity = 100;
+    // How much humidity each LED represents
+    float step = 100.0f / (float)LED_COUNT;
+    // How many LEDs should be on
+    uint8_t n = (uint8_t)((humidity + step / 2.0f) / step);
+    if (n > LED_COUNT)
+        n = LED_COUNT;
+    led_array_set(n); 
+}
+
 // Loading visualization
-void led_show_loading(uint32_t ms_total) {
+void led_array_show_loading(uint32_t ms_total) {
 
     uint32_t start_time = to_ms_since_boot(get_absolute_time());
 
@@ -142,7 +142,7 @@ void led_show_loading(uint32_t ms_total) {
 }
 
 // Error visualization
-void led_show_error(uint8_t code, uint32_t ms_total) {
+void led_array_show_error(uint8_t code, uint32_t ms_total) {
 
     uint32_t start_time = to_ms_since_boot(get_absolute_time());
 
