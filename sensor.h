@@ -23,7 +23,7 @@ Description: Provides interface for structures, functions, and constants for
 #define SENSOR_H
 
 // User can update the sleep value if adjustments are needed.
-const uint SLEEP_TIME = 20;
+const uint SLEEP_TIME = 100;
 
 // Structures
 // Create a structure for the DHT20 sensor data (Adapted from DHT example code)
@@ -40,13 +40,15 @@ void read_from_dht(dht_reading *result);
 #define DHT20_I2C_ADDR 0x38     // Default DHT20 sensor I2C addr
 #define DHT20_CMD_INIT 0xBE
 #define DHT20_CMD_TRIGGER 0xAC
+#define DHT20_CMD_BYTE_1 0x33
+#define DHT20_CMD_BYTE_2 0x00
 #define DHT20_CMD_SOFT_RESET 0xBA
 
 // Configure I2C
-#define I2C_PORT i2c0
-#define I2C_SDA_PIN 9
-#define I2C_SCL_PIN 10
-#define I2C_FREQ 400000
+#define I2C_PORT i2c1           // We should make sure this doesn't conflict with the LCD settings
+#define I2C_SDA_PIN 6
+#define I2C_SCL_PIN 7
+#define I2C_FREQ 100000         // Baud rate
 
 // Constants (Adapted from DHT example code)
 const uint DHT_PIN = 15;

@@ -48,114 +48,91 @@ GND (pin 38) -> GND on DHT20
 dht_reading sensor_measurement;
 dht_reading *sensor_measurement_ptr = &sensor_measurement;
 
-// Initialize DHT20 sensor (Adapted from DHT example code)
+// Initialize DHT20 sensor
 bool dht_init(void) {
-    stdio_init_all();
-
-    // I2C initialization sequence
-    i2c_init(I2C_PORT, I2C_FREQ); // Quicker baud rate of 400 kHz
+    printf("Initializing the DHT20 sensor.\n");
+    i2c_init(I2C_PORT, I2C_FREQ);
     gpio_set_function(I2C_SDA_PIN, GPIO_FUNC_I2C);
     gpio_set_function(I2C_SCL_PIN, GPIO_FUNC_I2C);
     gpio_pull_up(I2C_SDA_PIN);
     gpio_pull_up(I2C_SCL_PIN);
+
+    // Read status register to verify connection: To be implemented next
+    // uint8_t status;
+    // printf("Checking status register now: ");
+    // int status_register = i2c_read_blocking(I2C_PORT, DHT20_I2C_ADDR, &status, 1, false);
+    // if (status_register < 0) {
+    //     printf("DHT20 not found at address 0x%02X\n", DHT20_I2C_ADDR);
+    //     return false;
+    // } else {
+    //     printf("Status ok.\n");
+    // }
 
     return true;
 }
 
 // Get a reading from the DHT20 sensor (Adapted from DHT example code)
 void read_from_dht(dht_reading *result) {
-    // Create variables
-    int data[5] = {0, 0, 0, 0, 0};
-    uint previous_pin_state = 1;
-    uint received_data_bits = 0;
-
-    // Send an init signal (0) to the DHT sensor, then wait
-    // gpio_set_dir(DHT_PIN, GPIO_OUT);
-    // gpio_put(DHT_PIN, 0);
-    // uint8_t i2c_init_signal[3] = {0xAC, 0x33, 0x00};
-    printf("Going to try the write blocking function now...\n");
-    uint8_t i2c_init_signal[1] = {0x00};
-    int bytes_written = i2c_write_blocking_until(I2C_PORT, DHT20_I2C_ADDR, i2c_init_signal, 1, false, 5000);
-    if (bytes_written == PICO_ERROR_GENERIC) {
-        printf("PICO ERROR GENERIC\n");
+    // Send command trigger to sensor
+    printf("Sending the command trigger.\n");
+    uint8_t i2c_init_signal[3] = {DHT20_CMD_TRIGGER, DHT20_CMD_BYTE_1, DHT20_CMD_BYTE_2};
+    uint8_t received_data[7];
+    // int send_command = i2c_write_blocking(I2C_PORT, DHT20_I2C_ADDR, i2c_init_signal, 3, false);
+    int send_command = i2c_write_blocking_until(I2C_PORT, DHT20_I2C_ADDR, i2c_init_signal, 3, false, 5000);
+    if (send_command < 0) {
+        printf("Failed: send_command = %d\n", send_command);
     } else {
-        printf("SUCCESSFULLY WROTE %d bytes!!\n", bytes_written);
+        printf("Success: send_command = %d\n", send_command);
     }
-    // i2c_write_blocking(I2C_PORT, DHT20_I2C_ADDR, i2c_init_signal, 3, false);
     sleep_ms(SLEEP_TIME);
 
-    
-    // Set the DHT pin to receive input
-    gpio_set_dir(DHT_PIN, GPIO_IN);
-    uint8_t i2c_receive_buffer[40];
-
-    // Send an on command to the LED pin (indicates receiving/reading data)
-    printf("Reading from DHT20\n");
-
-    // Loop through timing cycles
-    for (uint i = 0; i < MAX_TIMINGS; i++) {
-        // Count the duration of pin status in microseconds
-        uint count = 0;
-        while (gpio_get(DHT_PIN) == previous_pin_state) {
-            count++;
-            sleep_us(1);
-            if (count == 255) break;        // Times out after 255 microseconds
-        }
-
-        // Update previous pin state
-        previous_pin_state = gpio_get(DHT_PIN);
-        if (count == 255) break;            // Times out after 255 microseconds
-
-        // First 4 cycles are the preamble, skip those
-        // Data bits are encoded in the even cycles, process those
-        if ((i >= 4) && (i % 2 == 0)) {
-            // Shift bits left after processing to allow for new bit
-            data [received_data_bits / 8] <<= 1;
-            // Pulse > 16 microseconds represents 1 bit: set the least significant bit to 1
-            if (count > 16) data[received_data_bits / 8] |= 1;
-            // Increment bit counter
-            received_data_bits++;
-        }
+    // Check if sensor is done: Status byte (0) bit 7 == 0 when ready
+    // if (received_data[0] & 0x80) {
+    //     printf("Sensor is busy.\n");
+    // }
+    while (received_data[0] & 0x80) {
+        printf("Sensor is busy.\n");
+        sleep_ms(SLEEP_TIME);
     }
 
-    // Turns off the LED when done receiving/reading
-    printf("Now validating data\n");
+    // Collect raw humidity data: 20 bits total
+    // From Byte 1: bits [19:12]
+    // From Byte 2: bits [11:4]
+    // From Byte 3: bits [3:0]
+    uint32_t raw_humidity = ((uint32_t)received_data[1] << 12 | (uint32_t)received_data[2] << 4 | (uint32_t)received_data[3] >> 4);
 
-    // Data validation: 40 bits received & checksum in byte 5 matches sum of 1st 4 bytes
-    // NOTE: This section is all experimental until we can verify the readings with a proper print/output set up
-    if ((received_data_bits >= 40) && (data[4] == ((data[0] + data[1] + data[2] + data[3]) & 0xFF))) {
-        // Process the data from raw bytes into decimal form
-        result->humidity = (float) ((data[0] << 8) + data[1]) / 10;
-        if (result->humidity > 100) {           // This block may not be necessary for the DHT20 - check when we can read the numbers
-            result->humidity = data[0];
-        }
-        result->temp_celsius = (float) (((data[2] & 0x7F) << 8) + data[3]) / 10;
-        if (result->temp_celsius > 125) {       // This block may not be necessary for the DHT20 - check when we can read the numbers
-            result->temp_celsius = data[2];
-        }
-        // Check for negative temperatures (bit 7, byte 3 = sign bit)
-        if (data[2] & 0x80) {
-            result->temp_celsius = -result->temp_celsius;
-        }
-    } else {
-        printf("Bad data\n");
-    }
+    // Convert humidity from binary to decimal percentage
+    result->humidity = (raw_humidity / 1048576.0f) * 100.0f;
+    result->humidity = 0.2 * 100.0f;
 }
 
 int main() {
-    sleep_ms(5000);             // Give the Pico time to power up
-    printf("Initializing the DHT20 sensor.\n");
+    // Initialize stdio, then wait for sensor to connect to USB
+    stdio_init_all();
+    sleep_ms(5000);
+
+    // Initialize DHT20 sensor
     int dht_init_status = dht_init();
+    if (dht_init_status == 0) {
+        printf("The sensor did not initialize successfully. Please restart.\n");
+        return 1;
+    }
     hard_assert(dht_init_status == 1);
+    printf("DHT20 sensor successfully initialized.\n");
+
+    // Start data read loop
+    printf("Starting measurements.\n");
     while (true) {
         // Read after successful DHT initialization, print status while reading
         // & processing data. Adapted from the DHT example code.
-        sleep_ms(5000);
-        printf("Initiating the read function now...\n");
+        printf("\n------------------------------------------------------\n");
         read_from_dht(sensor_measurement_ptr);
-        float fahrenheit = (sensor_measurement.temp_celsius * 9 / 5) + 32;
-        printf("Humidity = %.1f%%, Temperature = %.1fC (%.1fF)\n",
-        sensor_measurement.humidity, sensor_measurement.temp_celsius, fahrenheit);
+        // float fahrenheit = (sensor_measurement.temp_celsius * 9 / 5) + 32;
+        // printf("Humidity = %.1f%%, Temperature = %.1fC (%.1fF)\n",
+        // sensor_measurement.humidity, sensor_measurement.temp_celsius, fahrenheit);
+        printf("Humidity: %.0f%%\n", sensor_measurement.humidity);
         sleep_ms(2000);
     }
+
+    return 0;
 }
