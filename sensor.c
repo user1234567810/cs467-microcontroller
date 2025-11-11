@@ -57,26 +57,6 @@ bool dht_init(void) {
     gpio_set_function(I2C_SCL_PIN, GPIO_FUNC_I2C);
     gpio_pull_up(I2C_SDA_PIN);
     gpio_pull_up(I2C_SCL_PIN);
-    // printf("Done with the first code block.\n");
-
-    // Read status register to verify connection: To be implemented next
-    // uint8_t status;
-    // uint8_t status_cmd = DHT20_STATUS_COMMAND;
-    // printf("Checking status register: ");
-    // int write_status = i2c_write_blocking(I2C_PORT, DHT20_I2C_ADDR, &status_cmd, 1, true);
-    // int write_status = i2c_write_blocking_until(I2C_PORT, DHT20_I2C_ADDR, &status_cmd, 1, true, 2000);
-    // if (write_status < 0) {
-    //     printf("Failed to send the status command: status = %d\n.", write_status);
-    //     return false;
-    // }
-    // // int status_register = i2c_read_blocking(I2C_PORT, DHT20_I2C_ADDR, &status, 1, false);
-    // int status_register = i2c_read_blocking_until(I2C_PORT, DHT20_I2C_ADDR, &status, 1, false, 5000);
-    // if (status_register < 0) {
-    //     printf("DHT20 not found at address 0x%02X\n", DHT20_I2C_ADDR);
-    //     return false;
-    // } else {
-    //     printf("Status ok.\n");
-    // }
 
     return true;
 }
@@ -87,7 +67,6 @@ void read_from_dht(dht_reading *result) {
     printf("Sending the command trigger.\n");
     uint8_t i2c_init_signal[3] = {DHT20_CMD_TRIGGER, DHT20_CMD_BYTE_1, DHT20_CMD_BYTE_2};
     int send_command = i2c_write_blocking(I2C_PORT, DHT20_I2C_ADDR, i2c_init_signal, 3, false);
-    // int send_command = i2c_write_blocking_until(I2C_PORT, DHT20_I2C_ADDR, i2c_init_signal, 3, false, 5000);
     if (send_command < 0) {
         printf("Failed: send_command = %d\n", send_command);
     } else {
@@ -99,7 +78,6 @@ void read_from_dht(dht_reading *result) {
     printf("Receiving data from the sensor.\n");
     uint8_t received_data[7];
     int receive_data = i2c_read_blocking(I2C_PORT, DHT20_I2C_ADDR, received_data, 7, false);
-    // int receive_data = i2c_read_blocking_until(I2C_PORT, DHT20_I2C_ADDR, received_data, 7, false, 5000);
     if (receive_data < 0) {
         printf("Failed: receive_data = %d\n", receive_data);
     } else {
