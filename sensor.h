@@ -38,8 +38,6 @@ void read_from_dht(dht_reading *result);
 
 // Definitions (from the DHT20 Datasheet: https://aqicn.org/air/sensor/spec/asair-dht20.pdf)
 #define DHT20_I2C_ADDR 0x38
-#define DHT20_STATUS_COMMAND 0x71
-#define DHT20_STATUS_CALIBRATED 0x18
 #define DHT20_CMD_TRIGGER 0xAC
 #define DHT20_CMD_BYTE_1 0x33
 #define DHT20_CMD_BYTE_2 0x00
