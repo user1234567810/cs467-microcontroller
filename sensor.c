@@ -58,7 +58,7 @@ bool sensor_init(void) {
 }
 
 // Get a reading from the DHT20 sensor (Adapted from DHT example code)
-void read_from_dht(dht_reading *result) {
+void sensor_read_humidity(dht_reading *result) {
     // Send command trigger to sensor
     printf("Sending the command trigger.\n");
     uint8_t i2c_init_signal[3] = {DHT20_CMD_TRIGGER, DHT20_CMD_BYTE_1, DHT20_CMD_BYTE_2};
@@ -123,7 +123,7 @@ int main() {
         // Read after successful DHT initialization, print status while reading
         // & processing data. Adapted from the DHT example code.
         printf("\n------------------------------------------------------\n");
-        read_from_dht(sensor_measurement_ptr);
+        sensor_read_humidity(sensor_measurement_ptr);
         printf("Humidity: %.2f%%\n", get_humidity(sensor_measurement_ptr));
         sleep_ms(2000);
     }
