@@ -36,13 +36,11 @@ typedef struct {
 bool dht_init(void);
 void read_from_dht(dht_reading *result);
 
-// Definitions (adapted from Blink example code)
-#define DHT20_I2C_ADDR 0x38     // Default DHT20 sensor I2C addr
-#define DHT20_CMD_INIT 0xBE
+// Definitions (from the DHT20 Datasheet: https://aqicn.org/air/sensor/spec/asair-dht20.pdf)
+#define DHT20_I2C_ADDR 0x38
 #define DHT20_CMD_TRIGGER 0xAC
 #define DHT20_CMD_BYTE_1 0x33
 #define DHT20_CMD_BYTE_2 0x00
-#define DHT20_CMD_SOFT_RESET 0xBA
 
 // Configure I2C
 #define I2C_PORT i2c1           // We should make sure this doesn't conflict with the LCD settings
