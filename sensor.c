@@ -58,15 +58,16 @@ bool dht_init(void) {
     gpio_pull_up(I2C_SCL_PIN);
 
     // Read status register to verify connection: To be implemented next
-    // uint8_t status;
-    // printf("Checking status register now: ");
+    uint8_t status;
+    printf("Checking status register: ");
     // int status_register = i2c_read_blocking(I2C_PORT, DHT20_I2C_ADDR, &status, 1, false);
-    // if (status_register < 0) {
-    //     printf("DHT20 not found at address 0x%02X\n", DHT20_I2C_ADDR);
-    //     return false;
-    // } else {
-    //     printf("Status ok.\n");
-    // }
+    int status_register = i2c_read_blocking_until(I2C_PORT, DHT20_I2C_ADDR, &status, 1, false, 5000);
+    if (status_register < 0) {
+        printf("DHT20 not found at address 0x%02X\n", DHT20_I2C_ADDR);
+        return false;
+    } else {
+        printf("Status ok.\n");
+    }
 
     return true;
 }
