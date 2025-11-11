@@ -46,7 +46,7 @@ GND (pin 38) -> GND on DHT20
 #include "sensor.h"     // Sensor interface
 
 // Initialize DHT20 sensor
-bool sensor_init(void) {
+bool dht_init(void) {
     printf("Initializing the DHT20 sensor.\n");
     i2c_init(I2C_PORT, I2C_FREQ);
     gpio_set_function(I2C_SDA_PIN, GPIO_FUNC_I2C);
@@ -58,7 +58,7 @@ bool sensor_init(void) {
 }
 
 // Get a reading from the DHT20 sensor (Adapted from DHT example code)
-void sensor_read_humidity(dht_reading *result) {
+void read_from_dht(dht_reading *result) {
     // Send command trigger to sensor
     printf("Sending the command trigger.\n");
     uint8_t i2c_init_signal[3] = {DHT20_CMD_TRIGGER, DHT20_CMD_BYTE_1, DHT20_CMD_BYTE_2};
@@ -109,7 +109,7 @@ int main() {
     dht_reading *sensor_measurement_ptr = &sensor_measurement;
 
     // Initialize DHT20 sensor
-    int dht_init_status = sensor_init();
+    int dht_init_status = dht_init();
     if (dht_init_status == 0) {
         printf("The sensor did not initialize successfully. Please restart.\n");
         return 1;
@@ -123,7 +123,7 @@ int main() {
         // Read after successful DHT initialization, print status while reading
         // & processing data. Adapted from the DHT example code.
         printf("\n------------------------------------------------------\n");
-        sensor_read_humidity(sensor_measurement_ptr);
+        read_from_dht(sensor_measurement_ptr);
         printf("Humidity: %.2f%%\n", get_humidity(sensor_measurement_ptr));
         sleep_ms(2000);
     }
