@@ -35,6 +35,7 @@ typedef struct {
 // Function prototypes
 bool dht_init(void);
 void read_from_dht(dht_reading *result);
+float get_humidity(dht_reading *result);
 
 // Definitions (from the DHT20 Datasheet: https://aqicn.org/air/sensor/spec/asair-dht20.pdf)
 #define DHT20_I2C_ADDR 0x38

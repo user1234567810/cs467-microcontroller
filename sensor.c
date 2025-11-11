@@ -45,10 +45,6 @@ GND (pin 38) -> GND on DHT20
 // Import project files
 #include "sensor.h"     // Sensor interface
 
-// Initialize structure to hold data
-dht_reading sensor_measurement;
-dht_reading *sensor_measurement_ptr = &sensor_measurement;
-
 // Initialize DHT20 sensor
 bool dht_init(void) {
     printf("Initializing the DHT20 sensor.\n");
@@ -99,10 +95,18 @@ void read_from_dht(dht_reading *result) {
     result->humidity = (raw_humidity / 1048576.0f) * 100.0f;   // 2^20 = 1048576
 }
 
+float get_humidity(dht_reading *result) {
+    return result->humidity;
+}
+
 int main() {
     // Initialize stdio, then wait for sensor to connect to USB
     stdio_init_all();
     sleep_ms(5000);
+
+    // Initialize structure to hold data
+    dht_reading sensor_measurement;
+    dht_reading *sensor_measurement_ptr = &sensor_measurement;
 
     // Initialize DHT20 sensor
     int dht_init_status = dht_init();
@@ -120,7 +124,7 @@ int main() {
         // & processing data. Adapted from the DHT example code.
         printf("\n------------------------------------------------------\n");
         read_from_dht(sensor_measurement_ptr);
-        printf("Humidity: %.0f%%\n", sensor_measurement.humidity);
+        printf("Humidity: %.2f%%\n", get_humidity(sensor_measurement_ptr));
         sleep_ms(2000);
     }
 
