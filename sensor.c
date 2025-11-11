@@ -76,9 +76,8 @@ void read_from_dht(dht_reading *result) {
     // Send command trigger to sensor
     printf("Sending the command trigger.\n");
     uint8_t i2c_init_signal[3] = {DHT20_CMD_TRIGGER, DHT20_CMD_BYTE_1, DHT20_CMD_BYTE_2};
-    uint8_t received_data[7];
-    // int send_command = i2c_write_blocking(I2C_PORT, DHT20_I2C_ADDR, i2c_init_signal, 3, false);
-    int send_command = i2c_write_blocking_until(I2C_PORT, DHT20_I2C_ADDR, i2c_init_signal, 3, false, 5000);
+    int send_command = i2c_write_blocking(I2C_PORT, DHT20_I2C_ADDR, i2c_init_signal, 3, false);
+    // int send_command = i2c_write_blocking_until(I2C_PORT, DHT20_I2C_ADDR, i2c_init_signal, 3, false, 5000);
     if (send_command < 0) {
         printf("Failed: send_command = %d\n", send_command);
     } else {
@@ -86,16 +85,23 @@ void read_from_dht(dht_reading *result) {
     }
     sleep_ms(SLEEP_TIME);
 
-    // Check if sensor is done: Status byte (0) bit 7 == 0 when ready
-    // if (received_data[0] & 0x80) {
-    //     printf("Sensor is busy.\n");
-    // }
-    while (received_data[0] & 0x80) {
-        printf("Sensor is busy.\n");
-        sleep_ms(SLEEP_TIME);
+    // Read data back from the sensor
+    printf("Receiving data from the sensor.\n");
+    uint8_t received_data[7];
+    int receive_data = i2c_read_blocking(I2C_PORT, DHT20_I2C_ADDR, received_data, 7, false);
+    // int receive_data = i2c_read_blocking_until(I2C_PORT, DHT20_I2C_ADDR, received_data, 7, false, 5000);
+    if (receive_data < 0) {
+        printf("Failed: receive_data = %d\n", receive_data);
+    } else {
+        printf("Success: receive_data = %d\n", receive_data);
     }
 
-    // Collect raw humidity data: 20 bits total
+    // Check if sensor was done measuring: Status byte (0) bit 7 == 0 when ready
+    if (received_data[0] & 0x80) {
+        printf("Sensor is busy.\n");
+    }
+
+    // Collect raw humidity data from received_data bytes: 20 bits total
     // From Byte 1: bits [19:12]
     // From Byte 2: bits [11:4]
     // From Byte 3: bits [3:0]
@@ -127,9 +133,6 @@ int main() {
         // & processing data. Adapted from the DHT example code.
         printf("\n------------------------------------------------------\n");
         read_from_dht(sensor_measurement_ptr);
-        // float fahrenheit = (sensor_measurement.temp_celsius * 9 / 5) + 32;
-        // printf("Humidity = %.1f%%, Temperature = %.1fC (%.1fF)\n",
-        // sensor_measurement.humidity, sensor_measurement.temp_celsius, fahrenheit);
         printf("Humidity: %.0f%%\n", sensor_measurement.humidity);
         sleep_ms(2000);
     }
