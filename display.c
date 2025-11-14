@@ -39,7 +39,6 @@ const int LCD_CLEARDISPLAY = 0x01;
 const int LCD_ENTRYMODESET = 0x04;
 const int LCD_DISPLAYCONTROL = 0x08;
 const int LCD_FUNCTIONSET = 0x20;
-const int LCD_ENTRYSHIFTINCREMENT = 0x01;
 const int LCD_ENTRYLEFT = 0x02;
 const int LCD_DISPLAYON = 0x04;
 const int LCD_2LINE = 0x08;
@@ -83,9 +82,13 @@ static void lcd_send_byte(uint8_t val, uint8_t mode) {
     lcd_toggle_enable(low);
 }
 
-bool display_init(i2c_inst_t *i2c, uint sda, uint scl, uint8_t addr) {
+bool display_init(void) {
+    i2c_inst_t *i2c = LCD_I2C_PORT;
+    uint sda        = LCD_I2C_SDA_PIN;
+    uint scl        = LCD_I2C_SCL_PIN;
+    uint8_t addr    = LCD_I2C_ADDR;
 
-    i2c_init(i2c, 100000);  // Enable I2C at 100 kHz
+    i2c_init(i2c, LCD_I2C_FREQ);  // Enable I2C at 100 kHz
 
     // Configure SDA and SCL pins for I2C
     gpio_set_function(sda, GPIO_FUNC_I2C);
@@ -106,16 +109,16 @@ bool display_init(i2c_inst_t *i2c, uint sda, uint scl, uint8_t addr) {
     }
 
     // Initialize LCD into 4-bit mode
-    lcd_send_byte(0x03, 0);
-    lcd_send_byte(0x03, 0);
-    lcd_send_byte(0x03, 0);
-    lcd_send_byte(0x02, 0);
+    lcd_send_byte(0x03, LCD_COMMAND);
+    lcd_send_byte(0x03, LCD_COMMAND);
+    lcd_send_byte(0x03, LCD_COMMAND);
+    lcd_send_byte(0x02, LCD_COMMAND);
 
     // Set text entry, display mode, and clear screen
-    lcd_send_byte(LCD_ENTRYMODESET   | LCD_ENTRYLEFT, 0);
-    lcd_send_byte(LCD_FUNCTIONSET    | LCD_2LINE, 0);
-    lcd_send_byte(LCD_DISPLAYCONTROL | LCD_DISPLAYON, 0);
-    lcd_send_byte(LCD_CLEARDISPLAY, 0);
+    lcd_send_byte(LCD_ENTRYMODESET   | LCD_ENTRYLEFT, LCD_COMMAND);
+    lcd_send_byte(LCD_FUNCTIONSET    | LCD_2LINE, LCD_COMMAND);
+    lcd_send_byte(LCD_DISPLAYCONTROL | LCD_DISPLAYON, LCD_COMMAND);
+    lcd_send_byte(LCD_CLEARDISPLAY, LCD_COMMAND);
     sleep_ms(2);  // Allow LCD time to finish clear
 
     return true;

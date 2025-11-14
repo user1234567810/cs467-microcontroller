@@ -14,16 +14,20 @@ Description: Provides the public interface for controlling the LCD1602
 
 #include "pico/stdlib.h"
 #include "hardware/i2c.h"
+#include <stdbool.h>
+
+#define LCD_I2C_PORT      i2c0
+#define LCD_I2C_SDA_PIN   2
+#define LCD_I2C_SCL_PIN   3
+#define LCD_I2C_ADDR      0x27
+#define LCD_I2C_FREQ      100000
 
 /**
  * @brief Initialize the LCD1602 display using provided I2C instance
  * 
- * @param i2c   Pointer to I2C instance
- * @param sda   GPIO pin of SDA
- * @param scl   GPIO pin of SCL
- * @param addr  I2C address of the LCD1602
+ * @return True if initialization succeeds, false otherwise
  */
-bool display_init(i2c_inst_t *i2c, uint sda, uint scl, uint8_t addr);
+bool display_init(void);
 
 /**
  * @brief Clear the LCD display and reset the cursor to home position
