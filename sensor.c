@@ -54,6 +54,14 @@ bool dht_init(void) {
     gpio_pull_up(I2C_SDA_PIN);
     gpio_pull_up(I2C_SCL_PIN);
 
+    // Verify connection
+    uint8_t i2c_init_signal[1] = {0x00};
+    int result = i2c_read_blocking(I2C_PORT, DHT20_I2C_ADDR, i2c_init_signal, 1, false);
+    if (result < 0) {
+        printf("DHT20 not responding at address 0x%02X\n", DHT20_I2C_ADDR);
+        return false;
+    }
+
     return true;
 }
 
@@ -65,8 +73,6 @@ void read_from_dht(dht_reading *result) {
     int send_command = i2c_write_blocking(I2C_PORT, DHT20_I2C_ADDR, i2c_init_signal, 3, false);
     if (send_command < 0) {
         printf("Failed: send_command = %d\n", send_command);
-    } else {
-        printf("Success: send_command = %d\n", send_command);
     }
     sleep_ms(SLEEP_TIME);
 
@@ -76,8 +82,6 @@ void read_from_dht(dht_reading *result) {
     int receive_data = i2c_read_blocking(I2C_PORT, DHT20_I2C_ADDR, received_data, 7, false);
     if (receive_data < 0) {
         printf("Failed: receive_data = %d\n", receive_data);
-    } else {
-        printf("Success: receive_data = %d\n", receive_data);
     }
 
     // Check if sensor was done measuring: Status byte (0) bit 7 == 0 when ready
