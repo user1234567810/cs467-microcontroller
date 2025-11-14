@@ -87,6 +87,7 @@ void read_from_dht(dht_reading *result) {
     // Check if sensor was done measuring: Status byte (0) bit 7 == 0 when ready
     if (received_data[0] & 0x80) {
         printf("Sensor is busy.\n");
+        return;
     }
 
     // Collect raw humidity data from received_data bytes: 20 bits total
