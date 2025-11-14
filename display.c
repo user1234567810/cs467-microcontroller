@@ -24,46 +24,26 @@ Requires the following modules:
 
 Wiring configuration
 ** LCD1602 Display **
-GPIO 6 (pin 9)  -> SDA on LCD1602
-GPIO 7 (pin 10) -> SCL on LCD1602
+GPIO 4 (pin 6)  -> SDA on LCD1602
+GPIO 5 (pin 7) -> SCL on LCD1602
 3.3v (pin 36)   -> VCC on LCD1602
 GND (pin 38)    -> GND on LCD1602
 */
 
+#include <stdio.h>
 #include "pico/stdlib.h"
 #include "hardware/i2c.h"
 #include "display.h"
 
 const int LCD_CLEARDISPLAY = 0x01;
-const int LCD_RETURNHOME = 0x02;
 const int LCD_ENTRYMODESET = 0x04;
 const int LCD_DISPLAYCONTROL = 0x08;
-const int LCD_CURSORSHIFT = 0x10;
 const int LCD_FUNCTIONSET = 0x20;
-const int LCD_SETCGRAMADDR = 0x40;
-const int LCD_SETDDRAMADDR = 0x80;
-
-// Flags for display entry mode
 const int LCD_ENTRYSHIFTINCREMENT = 0x01;
 const int LCD_ENTRYLEFT = 0x02;
-
-// Flags for display and cursor control
-const int LCD_BLINKON = 0x01;
-const int LCD_CURSORON = 0x02;
 const int LCD_DISPLAYON = 0x04;
-
-// Flags for display and cursor shift
-const int LCD_MOVERIGHT = 0x04;
-const int LCD_DISPLAYMOVE = 0x08;
-
-// Flags for function set
-const int LCD_5x10DOTS = 0x04;
 const int LCD_2LINE = 0x08;
-const int LCD_8BITMODE = 0x10;
-
-// Flag for backlight control
 const int LCD_BACKLIGHT = 0x08;
-
 const int LCD_ENABLE_BIT = 0x04;
 
 // Modes for lcd_send_byte
