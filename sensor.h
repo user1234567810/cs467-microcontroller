@@ -49,4 +49,7 @@ float get_humidity(dht_reading *result);
 #define I2C_SCL_PIN 5
 #define I2C_FREQ 100000         // Baud rate
 
+// Define humidity conversion macros
+#define HUMIDITY_BIN_TO_DEC 1048576.0f   // 2^20 = 1048576
+
 #endif

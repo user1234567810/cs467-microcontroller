@@ -97,7 +97,7 @@ void read_from_dht(dht_reading *result) {
     uint32_t raw_humidity = ((uint32_t)received_data[1] << 12 | (uint32_t)received_data[2] << 4 | (uint32_t)received_data[3] >> 4);
 
     // Convert humidity from binary to decimal percentage
-    result->humidity = (raw_humidity / 1048576.0f) * 100.0f;   // 2^20 = 1048576
+    result->humidity = (raw_humidity / HUMIDITY_BIN_TO_DEC) * 100.0f;   
 }
 
 float get_humidity(dht_reading *result) {
