@@ -23,7 +23,7 @@ Description: Provides interface for structures, functions, and constants for
 #define SENSOR_H
 
 // User can update the sleep value if adjustments are needed.
-const uint SLEEP_TIME = 100;
+#define SLEEP_TIME 100
 
 // Structures
 // Create a structure for the DHT20 sensor data (Adapted from DHT example code)
