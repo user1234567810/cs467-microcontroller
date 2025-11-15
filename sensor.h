@@ -25,16 +25,38 @@ Description: Provides interface for structures, functions, and constants for
 // User can update the sleep value if adjustments are needed.
 #define SLEEP_TIME 100
 
-// Structures
-// Create a structure for the DHT20 sensor data (Adapted from DHT example code)
+/**
+ * @brief Create a structure for the DHT20 sensor data (Adapted from DHT example code)
+ */
 typedef struct {
     float humidity;
     float temp_celsius;
 } dht_reading;
 
+
 // Function prototypes
+/**
+ * @brief Initialize the DHT20 sensor using the provided I2C instance
+ * 
+ * Must be called once at startup before any measurements will be read.
+ * @return True if initialization succeeds, false otherwise
+ */
 bool dht_init(void);
+
+/**
+ * @brief Initiate, read, and process DHT20 sensor measurement data
+ * 
+ * @param *result A pointer to the dht_reading structure storing measurement values
+ */
 void read_from_dht(dht_reading *result);
+
+/**
+ * @brief Get the humidity value stored in the dht_reading structure provided
+ * 
+ * @param *result A pointer to the dht_reading structure storing measurement values
+ * 
+ * @return Most recent humidity reading as a float percentage value
+ */
 float get_humidity(dht_reading *result);
 
 // Definitions (from the DHT20 Datasheet: https://aqicn.org/air/sensor/spec/asair-dht20.pdf)
