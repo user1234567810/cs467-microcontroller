@@ -114,12 +114,12 @@ int main() {
     dht_reading *sensor_measurement_ptr = &sensor_measurement;
 
     // Initialize DHT20 sensor
-    int dht_init_status = dht_init();
-    if (dht_init_status == 0) {
+    bool dht_init_status = dht_init();
+    if (!dht_init_status) {
         printf("The sensor did not initialize successfully. Please restart.\n");
         return 1;
     }
-    hard_assert(dht_init_status == 1);
+    hard_assert(dht_init_status);
     printf("DHT20 sensor successfully initialized.\n");
 
     // Start data read loop
