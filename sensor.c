@@ -103,35 +103,3 @@ void read_from_dht(dht_reading *result) {
 float get_humidity(dht_reading *result) {
     return result->humidity;
 }
-
-int main() {
-    // Initialize stdio, then wait for sensor to connect to USB
-    stdio_init_all();
-    sleep_ms(5000);
-
-    // Initialize structure to hold data
-    dht_reading sensor_measurement;
-    dht_reading *sensor_measurement_ptr = &sensor_measurement;
-
-    // Initialize DHT20 sensor
-    bool dht_init_status = dht_init();
-    if (!dht_init_status) {
-        printf("The sensor did not initialize successfully. Please restart.\n");
-        return 1;
-    }
-    hard_assert(dht_init_status);
-    printf("DHT20 sensor successfully initialized.\n");
-
-    // Start data read loop
-    printf("Starting measurements.\n");
-    while (true) {
-        // Read after successful DHT initialization, print status while reading
-        // & processing data. Adapted from the DHT example code.
-        printf("\n------------------------------------------------------\n");
-        read_from_dht(sensor_measurement_ptr);
-        printf("Humidity: %.2f%%\n", get_humidity(sensor_measurement_ptr));
-        sleep_ms(2000);
-    }
-
-    return 0;
-}
