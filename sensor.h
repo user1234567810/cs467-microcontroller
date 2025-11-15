@@ -5,20 +5,16 @@ Author: Johanna Varness
 Date: 10/29/25
 Description: Provides interface for structures, functions, and constants for 
     the sensor.c and main.c files.
-
-    This file uses the Blink example as starter code. In initialization mode,
-    the default Pico LED will use the example Blink pattern to indicate the
-    successful initialization of the default LED and the DHT20 sensor. 
     
-    This file also adapts some DHT example code. In reading mode, the default
-    Pico LED will display a slower and smaller LED flash to indicate 
-    successful reading status.
+    This file utilizes some adapted DHT example code. The default Pico 
+    LED will display a slower and smaller LED flash to indicate when it
+    is reading and processing data.
 
-    The Raspberry Pi Blink and DHT example code is licensed as follows:
+    The Raspberry Pi DHT example code is licensed as follows:
     Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
     SPDX-License-Identifier: BSD-3-Clause
 
-    Blink & DHT example code is identified in the comments preceding code 
+    DHT example code is identified in the comments preceding code 
     blocks.
 */
 
@@ -26,39 +22,56 @@ Description: Provides interface for structures, functions, and constants for
 #ifndef SENSOR_H
 #define SENSOR_H
 
-// THESE VALUES CAN BE UPDATED
-// Mode: Change the boolean to switch the blinking DHT status indicator
-bool BLINK_AFTER_INIT = false;
-const uint SLEEP_TIME = 20;
+// User can update the sleep value if adjustments are needed.
+#define SLEEP_TIME 100
 
-// Structures
-// Create a structure for the DHT20 sensor data (Adapted from DHT example code)
+/**
+ * @brief Create a structure for the DHT20 sensor data (Adapted from DHT example code)
+ */
 typedef struct {
     float humidity;
     float temp_celsius;
 } dht_reading;
 
+
 // Function prototypes
-int pico_led_init(void);
+/**
+ * @brief Initialize the DHT20 sensor using the provided I2C instance
+ * 
+ * Must be called once at startup before any measurements will be read.
+ * @return True if initialization succeeds, false otherwise
+ */
 bool dht_init(void);
+
+/**
+ * @brief Initiate, read, and process DHT20 sensor measurement data
+ * 
+ * @param *result A pointer to the dht_reading structure storing measurement values
+ */
 void read_from_dht(dht_reading *result);
-void pico_set_led(bool led_on);
 
-// Definitions (adapted from Blink example code)
-#define LED_DELAY_MS 250
-#define DHT20_I2C_ADDR 0x38     // Default DHT20 sensor I2C addr
-#define DHT20_CMD_INIT 0xBE
+/**
+ * @brief Get the humidity value stored in the dht_reading structure provided
+ * 
+ * @param *result A pointer to the dht_reading structure storing measurement values
+ * 
+ * @return Most recent humidity reading as a float percentage value
+ */
+float get_humidity(dht_reading *result);
+
+// Definitions (from the DHT20 Datasheet: https://aqicn.org/air/sensor/spec/asair-dht20.pdf)
+#define DHT20_I2C_ADDR 0x38
 #define DHT20_CMD_TRIGGER 0xAC
-#define DHT20_CMD_SOFT_RESET 0xBA
+#define DHT20_CMD_BYTE_1 0x33
+#define DHT20_CMD_BYTE_2 0x00
 
-// Configure I2C
-#define I2C_PORT i2c0
-#define I2C_SDA_PIN 9
-#define I2C_SCL_PIN 10
-#define I2C_FREQ 400000
+// Configure I2C for DHT20 sensor
+#define I2C_PORT i2c0           // We should make sure this doesn't conflict with the LCD settings
+#define I2C_SDA_PIN 4
+#define I2C_SCL_PIN 5
+#define I2C_FREQ 100000         // Baud rate
 
-// Constants (Adapted from DHT example code)
-const uint DHT_PIN = 15;
-const uint MAX_TIMINGS = 85;
+// Define humidity conversion macros
+#define HUMIDITY_BIN_TO_DEC 1048576.0f   // 2^20 = 1048576
 
 #endif
