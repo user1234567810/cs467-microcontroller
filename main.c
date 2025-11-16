@@ -33,10 +33,11 @@ Assumes the following modules exist:
 // Constants
 // Checks every 2 seconds, can be adjusted as needed.
 #define HUMIDITY_CHECK_INTERVAL_MS 2000
+#define SLEEP 5000
 
 int main() {
     stdio_init_all(); // Initialize stdio
-
+    sleep_ms(SLEEP);
     printf("Raspberry Pi Humidity Sensor: Initializing hardware...\n");
 
     // Initialize the DHT20 humidity sensor (sensor.c/.h)
@@ -48,15 +49,17 @@ int main() {
     }
   
     // Initialize the display (display.c/.h)
-    // Uses I2C0, SDA=6, SCL=7, address=0x27
-    // Can't use error messages here because display_init currently returns void
-    display_init(i2c0, 6, 7, 0x27);
+    if (!display_init()) {
+        printf("ERROR: Failed to initialize LCD display!\n");
+        led_array_show_error(3, 2000); // Show error code 3 for 2 seconds
+        return 1;
+    }
   
     // Initialize the LED array (led_array.c/.h)
     if (!led_array_init()) {
         printf("ERROR: Failed to initialize LED array!\n");
         // Show error pattern on LED array (led_array.c/.h)
-        led_show_error(3, 2000); // Show error code 3 for 2 seconds
+        led_show_error(4, 2000); // Show error code 4 for 2 seconds
         return 1;
     }
 
@@ -68,11 +71,8 @@ int main() {
         dht_reading reading;
         // Read humidity and temperature from DHT20 (sensor.c/.h)
         read_from_dht(&reading);
-        // Print humidity and temperature to serial output
-        printf("Humidity: %.1f%%, Temperature: %.1fC (%.1fF)\n",
-               reading.humidity, reading.temp_celsius,
-               (reading.temp_celsius * 9 / 5) + 32);
-      
+        // Print only humidity to output
+        printf("Humidity: %.1f%%\n", reading.humidity);
         // Update the LCD display (display.c/.h)
         display_clear(); // Clear previous display
         display_set_cursor(0, 0); // Go to the top line of display
@@ -83,9 +83,7 @@ int main() {
         display_print(line1);
 
         // Update the LED array (led_array.c/.h)
-        // Map humidity % to number of LEDs to light up
-        uint8_t leds_on = humidity_to_leds(reading.humidity);
-        led_array_set(leds_on);
+        humidity_to_leds(reading.humidity);
 
         // Wait before next check
         sleep_ms(HUMIDITY_CHECK_INTERVAL_MS);
