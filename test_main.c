@@ -22,6 +22,10 @@ Each test prints its result to the console.
 #include "display.h"
 #include "led_array.h"
 
+// Constants
+// Checks every 2 seconds, can be adjusted as needed.
+#define SLEEP 5000
+
 // Helper macro for test result output
 #define TEST_ASSERT(cond, msg) \
     do { \
@@ -37,9 +41,8 @@ void test_initialization() {
     printf("\nTest: Initialization\n");
     bool sensor_ok = dht_init();
     TEST_ASSERT(sensor_ok, "Sensor initialization");
-    // Can't test display_init because it returns void
-    display_init(i2c0, 6, 7, 0x27);
-    printf("Display initialized)\n");
+    bool display_ok = display_init();
+    TEST_ASSERT(display_ok, "Display initialization");
     bool led_ok = led_array_init();
     TEST_ASSERT(led_ok, "LED array initialization");
 }
@@ -59,9 +62,8 @@ void test_led_array_mapping() {
     printf("\nTest: LED Array Mapping\n");
     float test_values[] = {0.0f, 20.0f, 40.0f, 60.0f, 80.0f, 100.0f};
     for (int i = 0; i < 6; ++i) {
-        uint8_t leds = humidity_to_leds(test_values[i]);
-        printf("Humidity: %.1f%% -> LEDs on: %u\n", test_values[i], leds);
-        led_array_set(leds); // Set the number of LEDs to light up
+        printf("Humidity: %.1f%% -> visualize on strip\n", test_values[i]);
+        humidity_to_leds(test_values[i]);
         sleep_ms(500); // Wait 500ms so you can see the result
     }
     printf("Check that the correct number of LEDs light up for each value.\n");
@@ -87,6 +89,7 @@ void test_display_update() {
 
 int main() {
     stdio_init_all();
+    sleep_ms(SLEEP);
     printf("\nHumidity Sensor Test Suite\n");
     test_initialization();
     test_sensor_read();
