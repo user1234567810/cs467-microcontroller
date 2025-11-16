@@ -37,7 +37,7 @@ Assumes the following modules exist:
 
 int main() {
     stdio_init_all(); // Initialize stdio
-    sleep_ms(SLEEP);
+    sleep_ms(SLEEP_MS);
     printf("Raspberry Pi Humidity Sensor: Initializing hardware...\n");
 
     // Initialize the DHT20 humidity sensor (sensor.c/.h)
