@@ -24,7 +24,7 @@ Each test prints its result to the console.
 
 // Constants
 // Checks every 2 seconds, can be adjusted as needed.
-#define SLEEP 5000
+#define SLEEP_MS 5000
 
 // Helper macro for test result output
 #define TEST_ASSERT(cond, msg) \
@@ -89,7 +89,7 @@ void test_display_update() {
 
 int main() {
     stdio_init_all();
-    sleep_ms(SLEEP);
+    sleep_ms(SLEEP_MS);
     printf("\nHumidity Sensor Test Suite\n");
     test_initialization();
     test_sensor_read();
