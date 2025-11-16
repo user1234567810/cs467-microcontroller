@@ -33,7 +33,7 @@ Assumes the following modules exist:
 // Constants
 // Checks every 2 seconds, can be adjusted as needed.
 #define HUMIDITY_CHECK_INTERVAL_MS 2000
-#define SLEEP 5000
+#define SLEEP_MS 5000
 
 int main() {
     stdio_init_all(); // Initialize stdio
@@ -44,7 +44,7 @@ int main() {
     if (!dht_init()) {
         printf("ERROR: Failed to initialize humidity sensor!\n");
         // Show error pattern on LED array (led_array.c/.h)
-        led_show_error(2, 2000); // Show error code 2 for 2 seconds
+        led_array_show_error(2, 2000); // Show error code 2 for 2 seconds
         return 1;
     }
   
@@ -59,7 +59,7 @@ int main() {
     if (!led_array_init()) {
         printf("ERROR: Failed to initialize LED array!\n");
         // Show error pattern on LED array (led_array.c/.h)
-        led_show_error(4, 2000); // Show error code 4 for 2 seconds
+        led_array_show_error(4, 2000); // Show error code 4 for 2 seconds
         return 1;
     }
 
