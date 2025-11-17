@@ -105,16 +105,33 @@ static void led_array_set(uint8_t leds_on) {
 
 // Convert humidity percentage (0–100) to LEDs (0-8)
 void humidity_to_leds(float humidity) {
-    if (humidity < 0)
-        humidity = 0;
-    if (humidity > 100)
-        humidity = 100;
-    // How much humidity each LED represents
-    float step = 100.0f / (float)LED_COUNT;
-    // How many LEDs should be on
-    uint8_t n = (uint8_t)((humidity + step / 2.0f) / step);
-    if (n > LED_COUNT)
-        n = LED_COUNT;
+
+    // Limit humidity to valid bounds
+    if (humidity < 0.0f)
+        humidity = 0.0f;
+    if (humidity > 100.0f)
+        humidity = 100.0f;
+    
+    uint8_t leds_on;
+    // Map humidity ranges to LED counts
+    if (humidity <= 19.0f){
+        leds_on = 1;
+    } else if (humidity <= 29.0f){
+        leds_on = 2;
+    } else if (humidity <= 39.0f){
+        leds_on = 3;
+    } else if (humidity <= 49.0f){
+        leds_on = 4;
+    } else if (humidity <= 59.0f){
+        leds_on = 5;
+    } else if (humidity <= 69.0f){
+        leds_on = 6;
+    } else if (humidity <= 79.0f){
+        leds_on = 7;
+    } else {
+        leds_on = 8;
+    }
+    // Update LED Strip
     led_array_set(n); 
 }
 
