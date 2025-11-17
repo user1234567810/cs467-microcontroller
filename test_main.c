@@ -11,7 +11,7 @@ Responsibilities:
 
 Usage:
 This file is intended to be compiled and run on the Raspberry Pi Pico
-to verify correct operation of the main project modules. 
+to verify correct operation of the main project modules.
 Each test prints its result to the console.
 */
 
@@ -36,7 +36,7 @@ Each test prints its result to the console.
         } \
     } while (0)
 
-// Test 1: Initialization of all modules
+// Test 1: Initialization of all modules (called once at startup)
 void test_initialization() {
     printf("\nTest: Initialization\n");
     bool sensor_ok = dht_init();
@@ -45,6 +45,30 @@ void test_initialization() {
     TEST_ASSERT(display_ok, "Display initialization");
     bool led_ok = led_array_init();
     TEST_ASSERT(led_ok, "LED array initialization");
+}
+
+// Test: Check if hardware is still working (called in loop)
+void test_hardware_status() {
+    printf("\nTest: Hardware Status Check\n");
+
+    // Test sensor by attempting to read
+    dht_reading reading;
+    read_from_dht(&reading);
+    bool sensor_ok = (reading.humidity >= 0.0f && reading.humidity <= 100.0f);
+    TEST_ASSERT(sensor_ok, "Sensor is responding");
+    if (!sensor_ok) {
+        printf("  -> Sensor may be disconnected or faulty\n");
+    }
+
+    // Test display by writing to it
+    display_clear();
+    display_set_cursor(0, 0);
+    display_print("Status: OK");
+    printf("[INFO] Display write attempted\n");
+
+    // Test LED array by setting a pattern
+    humidity_to_leds(50.0f);
+    printf("[INFO] LED array write attempted\n");
 }
 
 // Test 2: Read humidity from sensor
@@ -90,11 +114,29 @@ void test_display_update() {
 int main() {
     stdio_init_all();
     sleep_ms(SLEEP_MS);
-    printf("\nHumidity Sensor Test Suite\n");
+
+    printf("\n========================================\n");
+    printf("Humidity Sensor Test Suite\n");
+    printf("========================================\n");
+
+    // Initialize hardware ONCE at startup
     test_initialization();
-    test_sensor_read();
-    test_led_array_mapping();
-    test_display_update();
-    printf("\nAll tests complete.\n");
+
+    // Run tests in an infinite loop to detect runtime failures
+    while (true) {
+        printf("\n========================================\n");
+        printf("Runtime Test Cycle\n");
+        printf("========================================\n");
+
+        test_hardware_status();   // Check if hardware is still working
+        test_sensor_read();        // Read from sensor
+        test_led_array_mapping();  // Test LED patterns
+        test_display_update();     // Test display updates
+
+        printf("\nAll tests complete.\n");
+        printf("Waiting 5 seconds before next test cycle...\n\n");
+        sleep_ms(SLEEP_MS);
+    }
+
     return 0;
 }
