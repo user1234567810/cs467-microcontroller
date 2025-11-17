@@ -114,19 +114,19 @@ void humidity_to_leds(float humidity) {
     
     uint8_t leds_on;
     // Map humidity ranges to LED counts
-    if (humidity <= 19.0f){
+    if (humidity < 20.0f){
         leds_on = 1;
-    } else if (humidity <= 29.0f){
+    } else if (humidity < 30.0f){
         leds_on = 2;
-    } else if (humidity <= 39.0f){
+    } else if (humidity < 40.0f){
         leds_on = 3;
-    } else if (humidity <= 49.0f){
+    } else if (humidity < 50.0f){
         leds_on = 4;
-    } else if (humidity <= 59.0f){
+    } else if (humidity < 60.0f){
         leds_on = 5;
-    } else if (humidity <= 69.0f){
+    } else if (humidity < 70.0f){
         leds_on = 6;
-    } else if (humidity <= 79.0f){
+    } else if (humidity < 80.0f){
         leds_on = 7;
     } else {
         leds_on = 8;
