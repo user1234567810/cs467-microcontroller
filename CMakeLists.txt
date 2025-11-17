@@ -22,17 +22,46 @@ add_executable(${projname}
         sensor.c
         )
 
-target_link_libraries(${projname} 
-        pico_stdlib
-        )
+# Generate PIO header from .pio file
+pico_generate_pio_header(${projname} ${CMAKE_CURRENT_LIST_DIR}/ws2812.pio)
 
 # adjust to enable stdio via usb, or uart
 pico_enable_stdio_usb(${projname} 1)
 pico_enable_stdio_uart(${projname} 0)
 
 # Link the executable with Pico standard library and hardware libraries
-target_link_libraries(humidity_sensor 
-    pico_stdlib 
-    hardware_gpio 
-    hardware_i2c )
+target_link_libraries(${projname}
+    pico_stdlib
+    hardware_gpio
+    hardware_i2c
+    hardware_pio
+    hardware_clocks )
 
+# Create map/bin/hex/uf2 files
+pico_add_extra_outputs(${projname})
+
+# Build the test executable
+add_executable(${projname}_test
+        test_main.c
+        display.c
+        led_array.c
+        sensor.c
+        )
+
+# Generate PIO header for test executable
+pico_generate_pio_header(${projname}_test ${CMAKE_CURRENT_LIST_DIR}/ws2812.pio)
+
+# Enable stdio via USB for test executable
+pico_enable_stdio_usb(${projname}_test 1)
+pico_enable_stdio_uart(${projname}_test 0)
+
+# Link libraries for test executable
+target_link_libraries(${projname}_test
+    pico_stdlib
+    hardware_gpio
+    hardware_i2c
+    hardware_pio
+    hardware_clocks )
+
+# Create output files for test executable
+pico_add_extra_outputs(${projname}_test)
