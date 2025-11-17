@@ -132,7 +132,7 @@ void humidity_to_leds(float humidity) {
         leds_on = 8;
     }
     // Update LED Strip
-    led_array_set(n); 
+    led_array_set(leds_on); 
 }
 
 // Loading visualization
