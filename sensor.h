@@ -31,6 +31,7 @@ Description: Provides interface for structures, functions, and constants for
 typedef struct {
     float humidity;
     float temp_celsius;
+    float temp_fahrenheit;
 } dht_reading;
 
 
@@ -51,6 +52,15 @@ bool dht_init(void);
 void read_from_dht(dht_reading *result);
 
 /**
+ * @brief Convert a given float value from Celsius to Fahrenheit
+ * 
+ * @param float A Celsius float value
+ * 
+ * @return Fahrenheit float value
+ */
+float celsius_to_fahrenheit(float temp_celsius);
+
+/**
  * @brief Get the humidity value stored in the dht_reading structure provided
  * 
  * @param *result A pointer to the dht_reading structure storing measurement values
@@ -58,6 +68,24 @@ void read_from_dht(dht_reading *result);
  * @return Most recent humidity reading as a float percentage value
  */
 float get_humidity(dht_reading *result);
+
+/**
+ * @brief Get the temperature value in Celsius stored in the dht_reading structure provided
+ * 
+ * @param *result A pointer to the dht_reading structure storing measurement values
+ * 
+ * @return Most recent temperature reading in Celsius as a float value
+ */
+float get_temp_celsius(dht_reading *result);
+
+/**
+ * @brief Get the temperature value in Fahrenheit stored in the dht_reading structure provided
+ * 
+ * @param *result A pointer to the dht_reading structure storing measurement values
+ * 
+ * @return Most recent temperature reading in Fahrenheit as a float value
+ */
+float get_temp_fahrenheit(dht_reading *result);
 
 // Definitions (from the DHT20 Datasheet: https://aqicn.org/air/sensor/spec/asair-dht20.pdf)
 #define DHT20_I2C_ADDR 0x38
@@ -72,6 +100,6 @@ float get_humidity(dht_reading *result);
 #define I2C_FREQ 100000         // Baud rate
 
 // Define humidity conversion macros
-#define HUMIDITY_BIN_TO_DEC 1048576.0f   // 2^20 = 1048576
+#define BIN_TO_DEC 1048576.0f   // 2^20 = 1048576
 
 #endif

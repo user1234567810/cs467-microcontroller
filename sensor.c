@@ -65,6 +65,11 @@ bool dht_init(void) {
     return true;
 }
 
+// Convert a given Celsius float value to Fahrenheit
+float celsius_to_fahrenheit(float temp_celsius) {
+    return (temp_celsius * 9.0 / 5.0) + 32.0;
+}
+
 // Get a reading from the DHT20 sensor (Adapted from DHT example code)
 void read_from_dht(dht_reading *result) {
     // Send command trigger to sensor
@@ -97,9 +102,29 @@ void read_from_dht(dht_reading *result) {
     uint32_t raw_humidity = ((uint32_t)received_data[1] << 12 | (uint32_t)received_data[2] << 4 | (uint32_t)received_data[3] >> 4);
 
     // Convert humidity from binary to decimal percentage
-    result->humidity = (raw_humidity / HUMIDITY_BIN_TO_DEC) * 100.0f;   
+    result->humidity = (raw_humidity / BIN_TO_DEC) * 100.0f;
+
+    // Extract raw temperature data from received_data bytes: 20 bits total
+    // From Byte 3: bits [19:16]
+    // From Byte 4: bits [15:8]
+    // From Byte 5: bits [7:0]
+    uint32_t raw_temp = ((uint32_t)(received_data[3] & 0x0F) << 16) | ((uint32_t)received_data[4] << 8) | received_data[5];
+
+    // Convert raw temp data to Celsius
+    result->temp_celsius = ((float)raw_temp / BIN_TO_DEC) * 200.0f - 50.0f;
+
+    // Convert temp in Celsius to Fahrenheit
+    result->temp_fahrenheit = celsius_to_fahrenheit(result->temp_celsius);
 }
 
 float get_humidity(dht_reading *result) {
     return result->humidity;
+}
+
+float get_temp_celsius(dht_reading *result) {
+    return result->temp_celsius;
+}
+
+float get_temp_fahrenheit(dht_reading *result) {
+    return result->temp_fahrenheit;
 }
