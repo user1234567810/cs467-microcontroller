@@ -113,7 +113,9 @@ void test_display_update() {
 
 int main() {
     stdio_init_all();
-    sleep_ms(SLEEP_MS);
+
+    printf("\nWaiting 10 seconds before starting tests...\n");
+    sleep_ms(10000);
 
     printf("\n========================================\n");
     printf("Humidity Sensor Test Suite\n");
@@ -134,8 +136,8 @@ int main() {
         test_display_update();     // Test display updates
 
         printf("\nAll tests complete.\n");
-        printf("Waiting 5 seconds before next test cycle...\n\n");
-        sleep_ms(SLEEP_MS);
+        printf("Waiting 10 seconds before next test cycle...\n\n");
+        sleep_ms(10000);
     }
 
     return 0;
