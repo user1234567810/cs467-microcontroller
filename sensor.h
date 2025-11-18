@@ -94,7 +94,7 @@ float get_temp_fahrenheit(dht_reading *result);
 #define DHT20_CMD_BYTE_2 0x00
 
 // Configure I2C for DHT20 sensor
-#define I2C_PORT i2c0           // We should make sure this doesn't conflict with the LCD settings
+#define I2C_PORT i2c0
 #define I2C_SDA_PIN 4
 #define I2C_SCL_PIN 5
 #define I2C_FREQ 100000         // Baud rate
