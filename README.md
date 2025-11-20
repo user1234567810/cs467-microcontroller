@@ -14,6 +14,7 @@ The Home Humidity Sensor is an embedded system built with C on the Raspberry Pi 
 1. Open codespaces, type:
    - `rm -rf build`
    - `cmake -S . -B build -G "Ninja"`
+     - _Note: Add `-DPICO_BOARD=pico2` to the line above if you’re building for a Pico2W, omit otherwise_
    - `cmake --build build`
 2. Download `.uf2` firmware that was created in the build folder
 3. Flash Pico with that `.uf2`
