@@ -54,7 +54,7 @@ void read_from_dht(dht_reading *result);
 /**
  * @brief Convert a given float value from Celsius to Fahrenheit
  * 
- * @param float A Celsius float value
+ * @param temp_celsius A Celsius float value
  * 
  * @return Fahrenheit float value
  */
