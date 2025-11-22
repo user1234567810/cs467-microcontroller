@@ -1,5 +1,8 @@
 {
     "cmake.cmakePath": "/usr/bin/cmake",
     "cmake.generator": "Unix Makefiles",
-    "cmake.useCMakePresets": "always"
+    "cmake.useCMakePresets": "always",
+    "files.associations": {
+        "regex": "c"
+    }
 }

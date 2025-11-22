@@ -1,3 +1,12 @@
+/*
+File: wifi.h
+Language: C
+Author: Andrew Poon
+Date: 11/22/25
+Description: Provides the public interface for the WiFi connectivity
+    and HTTP server module.
+*/
+
 #ifndef WIFI_H
 #define WIFI_H
 

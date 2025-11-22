@@ -9,6 +9,8 @@ set(CMAKE_CXX_STANDARD 17)
 
 pico_sdk_init()
 
+option(ENABLE_WIFI "Enable WiFi (Pico 2 W only)" OFF)
+
 #include(example_auto_set_url.cmake)
 
 # add_subdirectory()
@@ -21,6 +23,18 @@ add_executable(${projname}
         led_array.c
         sensor.c
         )
+
+target_include_directories(${projname} PRIVATE
+        ${CMAKE_CURRENT_LIST_DIR}
+)
+
+if(ENABLE_WIFI)
+    target_sources(${projname} PRIVATE
+        wifi.c
+        web_server.c
+    )
+endif()
+
 
 # Generate PIO header from .pio file
 pico_generate_pio_header(${projname} ${CMAKE_CURRENT_LIST_DIR}/ws2812.pio)
@@ -36,6 +50,15 @@ target_link_libraries(${projname}
     hardware_i2c
     hardware_pio
     hardware_clocks )
+
+
+if(ENABLE_WIFI)
+    target_compile_definitions(${projname} PRIVATE ENABLE_WIFI=1)
+
+    target_link_libraries(${projname}
+        pico_cyw43_arch_lwip_threadsafe_background
+    )
+endif()
 
 # Create map/bin/hex/uf2 files
 pico_add_extra_outputs(${projname})

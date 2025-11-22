@@ -30,6 +30,11 @@ Assumes the following modules exist:
 #include "display.h"    // Display interface (display.c/.h)
 #include "led_array.h"  // LED array interface (led_array.c/.h)
 
+#ifdef ENABLE_WIFI
+#include "wifi.h"       // Wi-Fi interface
+#include "web_server.h"  // Simple HTTP server interface
+#endif
+
 // Constants
 // Checks every 2 seconds, can be adjusted as needed.
 #define HUMIDITY_CHECK_INTERVAL_MS 2000
@@ -63,6 +68,19 @@ int main() {
         return 1;
     }
 
+#ifdef ENABLE_WIFI
+    // Optional Wi-Fi stretch goal: start AP + web server (Pico W / Pico 2 W only)
+    if (!wifi_start_ap("PICO-HUMIDITY", "pico1234")) {
+        printf("WARNING: Failed to start Wi-Fi access point. Continuing without Wi-Fi.\n");
+    } else {
+        if (!web_server_start(80)) {
+            printf("WARNING: Failed to start web server. Continuing without Wi-Fi.\n");
+        } else {
+            printf("Wi-Fi AP active. Connect to SSID 'PICO-HUMIDITY' and open http://192.168.4.1/\n");
+        }
+    }
+#endif
+
     printf("Initialization complete. Entering main loop.\n");
 
     // Main loop
@@ -84,6 +102,11 @@ int main() {
 
         // Update the LED array (led_array.c/.h)
         humidity_to_leds(reading.humidity);
+
+#ifdef ENABLE_WIFI
+        // Let the web server handle any incoming requests using the latest humidity
+        //web_server_poll(reading.humidity);
+#endif
 
         // Wait before next check
         sleep_ms(HUMIDITY_CHECK_INTERVAL_MS);

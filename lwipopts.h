@@ -4,6 +4,8 @@ Language: C
 Author: Andrew Poon
 Date Created: 11/21/25
 Description:
+    This is essentially the settings menu for the Pico's internet connection.
+
     This code is from the official Raspberry Pi Pico SDK examples and is
     licensed as follows:
     Copyright (c) 2020 Raspberry Pi (Trading) Ltd.
