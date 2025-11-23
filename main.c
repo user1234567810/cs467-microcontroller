@@ -31,8 +31,7 @@ Assumes the following modules exist:
 #include "led_array.h"  // LED array interface (led_array.c/.h)
 
 #ifdef ENABLE_WIFI
-#include "wifi.h"       // Wi-Fi interface
-#include "web_server.h"  // Simple HTTP server interface
+#include "network.h"
 #endif
 
 // Constants
@@ -70,13 +69,13 @@ int main() {
 
 #ifdef ENABLE_WIFI
     // Optional Wi-Fi stretch goal: start AP + web server (Pico W / Pico 2 W only)
-    if (!wifi_start_ap("PICO-HUMIDITY", "pico1234")) {
-        printf("WARNING: Failed to start Wi-Fi access point. Continuing without Wi-Fi.\n");
+    if (!wifi_start_ap("PICO2W", "capstone467")) {
+        printf("ERROR: Failed to start WiFi access point.\n");
     } else {
         if (!web_server_start(80)) {
-            printf("WARNING: Failed to start web server. Continuing without Wi-Fi.\n");
+            printf("ERROR: Failed to start web server.\n");
         } else {
-            printf("Wi-Fi AP active. Connect to SSID 'PICO-HUMIDITY' and open http://192.168.4.1/\n");
+            printf("WiFi AP active. Connect to SSID 'PICO2W' and open http://192.168.4.1/\n");
         }
     }
 #endif
@@ -102,12 +101,7 @@ int main() {
 
         // Update the LED array (led_array.c/.h)
         humidity_to_leds(reading.humidity);
-
-#ifdef ENABLE_WIFI
-        // Let the web server handle any incoming requests using the latest humidity
-        //web_server_poll(reading.humidity);
-#endif
-
+    
         // Wait before next check
         sleep_ms(HUMIDITY_CHECK_INTERVAL_MS);
     }

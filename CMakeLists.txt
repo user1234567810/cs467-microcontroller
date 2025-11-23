@@ -30,8 +30,7 @@ target_include_directories(${projname} PRIVATE
 
 if(ENABLE_WIFI)
     target_sources(${projname} PRIVATE
-        wifi.c
-        web_server.c
+        network.c
     )
 endif()
 
