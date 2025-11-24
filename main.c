@@ -30,6 +30,7 @@ Assumes the following modules exist:
 #include "display.h"    // Display interface (display.c/.h)
 #include "led_array.h"  // LED array interface (led_array.c/.h)
 
+// Optional WiFi feature toggle (only use with Pico2W)
 #ifdef ENABLE_WIFI
 #include "network.h"
 #endif
@@ -67,15 +68,16 @@ int main() {
         return 1;
     }
 
+// Start WiFi access point and web server
+// This block only runs when compile time flag ENABLE_WIFI is used
 #ifdef ENABLE_WIFI
-    // Optional Wi-Fi stretch goal: start AP + web server (Pico W / Pico 2 W only)
-    if (!wifi_start_ap("PICO2W", "capstone467")) {
+    if (!wifi_start_ap("PICO2W-AP", "capstone467")) {
         printf("ERROR: Failed to start WiFi access point.\n");
     } else {
         if (!web_server_start(80)) {
             printf("ERROR: Failed to start web server.\n");
         } else {
-            printf("WiFi AP active. Connect to SSID 'PICO2W' and open http://192.168.4.1/\n");
+            printf("WiFi AP active. Connect to SSID 'PICO2W-AP' and open http://192.168.4.1/\n");
         }
     }
 #endif
