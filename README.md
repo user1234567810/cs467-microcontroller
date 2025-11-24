@@ -7,31 +7,37 @@ The Home Humidity Sensor is an embedded system built with C on the Raspberry Pi 
 1. `main.c` - Initializes hardware and runs the main program. Calls function to read the sensor, update the LED array, and update the display.
 2. `sensor.c` - Contains function to initialize and read data from the humidity sensor.
 3. `led_array.c` - Contains functions to initialize the LED array and set their state based on humidity levels.
-5. `display.c` - Contains functions to initialize and update the display with the current humidity level.
+4. `display.c` - Contains functions to initialize and update the display with the current humidity level.
+5. `network.c` - Contains functions to initialize a Pico2W with WiFi access point (AP) mode and launch a built-in server.
 6. `CMakeLists.txt` - Build configuration file using CMake.
 
-### Building the .uf2 Firmware in GitHub Codespaces
-1. Open codespaces, type:
-Base firmware (works only on Pico1)
-   - `rm -rf build` (remove previous build folders, if applicable)
-   - `cmake -S . -B build -DPICO_BOARD=pico`
-   - `cmake --build build`
-WiFi firmware (works only on Pico2W)
-   - `rm -rf build` (remove previous build folders, if applicable)
-   - `cmake -S . -B build -DPICO_BOARD=pico2_w -DENABLE_WIFI=ON`
-   - `cmake --build build`
+### Building the Firmware
+Run the following commands in the GitHub Codespaces terminal:
 
-2. Download `.uf2` firmware that was created in the build folder
-3. Flash Pico with that `.uf2`
-   - Unplug Pico
-   - Hold down BOOTSEL button
-   - Plug in Pico
-   - Pico should appear as RPI-RP2
-   - Drag and drop `.uf2` into it
+**Option A: Base Firmware (Raspberry Pi Pico)**
+```bash
+rm -rf build
+cmake -S . -B build -DPICO_BOARD=pico
+cmake --build build
+```
+**Option B: WiFi Firmware (Raspberry Pi Pico 2 W)**
+```bash
+rm -rf build
+cmake -S . -B build -DPICO_BOARD=pico2_w -DENABLE_WIFI=ON
+cmake --build build
+```
+
+**Flashing the Device**
+1. Download the `.uf2` file generated in the `build/` folder.
+2. Unplug the Pico from your computer.
+3. Hold down the **BOOTSEL** button.
+4. Plug the Pico back in (continue holding BOOTSEL until the drive appears).
+5. The Pico should mount as a storage device named `RPI-RP2` (or `RP2350` for a Pico2W).
+6. Drag and drop the `.uf2` file into that storage device.
 
 ## Wiring Diagram
 ![Wiring Diagram](docs/wiring-diagram-v01.jpg)
-_Note: All GND pins on the Pico are electrically equivalent. The diagram shows specific GND pins for clarity, but any GND pin will work._
+_Note: All GND pins on the Pico are electrically equivalent. The diagram shows specific GND pins for clarity, but any GND pin will work. Also, this wiring diagram is applicable to both Pico and Pico2W_
 
 ## Visualization Logic
 
