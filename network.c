@@ -27,6 +27,7 @@ Requires the following modules:
 
 #include "network.h"
 #include "led_array.h"
+#include "web_ui.h"
 
 #include "pico/cyw43_arch.h"
 #include "lwip/tcp.h"
@@ -35,6 +36,8 @@ Requires the following modules:
 #include <string.h>
 
 #define HTTP_PORT_DEFAULT 80
+#define HTTP_BODY_MAX     1400
+#define HTTP_RESP_MAX     (HTTP_BODY_MAX + 256)
 
 // TCP listener for the HTTP server
 static struct tcp_pcb *http_listener_pcb = NULL;
@@ -157,27 +160,34 @@ static err_t http_accept(void *arg, struct tcp_pcb *new_pcb, err_t err) {
 
 // Send a HTML page to client
 static void send_http_response(struct tcp_pcb *tpcb) {
-    char body[512];
 
-    snprintf(body, sizeof(body),
-        "<!DOCTYPE html>\r\n"
-        "<html>\r\n"
-        "<head><meta charset=\"UTF-8\">"
-        "<title>Microcontroller Home Humidity Sensor - Settings</title></head>\r\n"
-        "<body style=\"display:grid;place-items:center;height:100vh;margin:0\">\r\n"
-        "<h1>Microcontroller Home Humidity Sensor</h1>\r\n"
+    // Buffer for the formatted HTML page
+    char body[HTTP_BODY_MAX];
+    
+    // Check current LED state
+    bool enabled = led_array_is_enabled();
 
-        "<p>LED control:</p>\r\n"
-        "<p>\r\n"
-        "<a href=\"/set?led=on\">Turn LEDs ON</a><br/>\r\n"
-        "<a href=\"/set?led=off\">Turn LEDs OFF</a>\r\n"
-        "</p>\r\n"
+    // Values inserted into the HTML template at runtime
+    const char *href         = enabled ? "/set?led=off" : "/set?led=on";
+    const char *toggle_class = enabled ? "toggle on"    : "toggle";
+    const char *status_text  = enabled ? "On"           : "Off";
 
-        "</body>\r\n"
-        "</html>\r\n"
-    );
+    // Format HTML page using template and values
+    int body_len_int = snprintf(body, sizeof(body),
+                                PAGE_INDEX_HTML,
+                                href,
+                                status_text,
+                                toggle_class);
+    if (body_len_int < 0) {
+        body[0] = '\0';
+    }
 
-    size_t body_len = strlen(body);
+    // Clamp buffer size to avoid overflow issues
+    size_t body_len = (size_t)body_len_int;
+    if (body_len >= sizeof(body)) {
+        body_len = sizeof(body) - 1;
+        body[body_len] = '\0';
+    }
 
     // Standard HTTP header
     char header[256];
@@ -190,7 +200,7 @@ static void send_http_response(struct tcp_pcb *tpcb) {
                               body_len);
 
     // Allocate a temporary buffer for full HTTP response (header + body)
-    char response[512 + 256];
+    char response[HTTP_RESP_MAX];
     size_t total_len = (size_t)header_len + body_len;
     if (total_len > sizeof(response)) {
         total_len = sizeof(response);
