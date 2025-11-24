@@ -43,6 +43,16 @@ void humidity_to_leds(float humidity);
 void led_array_set_enabled(bool enabled);
 
 /**
+ * @brief Get the current LED output state
+ *
+ * Shows whether the LED array is currently allowed to display
+ * visualizations.
+ *
+ * @return true if LED output is enabled, false if disabled
+ */
+bool led_array_is_enabled(void);
+
+/**
  * @brief Display a loading "ping pong" animation pattern
  *
  * Useful for initialization and booting states

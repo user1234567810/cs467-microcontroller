@@ -40,6 +40,7 @@ GND  (pin 38)  -> GND on LED strip
 static PIO pio = pio0;      // PIO block used to drive LEDs
 static int sm = -1;         // State machine index for LED control
 static uint32_t led_buf[LED_COUNT]; // Buffer holding LED color data
+static bool s_led_enabled = true;   // Private flag tracking LED output
 
 // Pack RGB into GRB order
 static inline uint32_t pack_grb(uint8_t r, uint8_t g, uint8_t b) {
@@ -103,8 +104,12 @@ static void led_array_set(uint8_t leds_on) {
     hw_show();
 }
 
+// Return whether LEDs are currently enabled
+bool led_array_is_enabled(void) {
+    return s_led_enabled;
+}
+
 // Enable or disable LED output on WS2812 strip
-static bool s_led_enabled = true;
 void led_array_set_enabled(bool enabled) {
     s_led_enabled = enabled;
     if (!enabled) {
