@@ -103,9 +103,22 @@ static void led_array_set(uint8_t leds_on) {
     hw_show();
 }
 
+// Enable or disable LED output on WS2812 strip
+static bool s_led_enabled = true;
+void led_array_set_enabled(bool enabled) {
+    s_led_enabled = enabled;
+    if (!enabled) {
+        // Turn off LED strip
+        hw_clear();
+    }
+}
+
 // Convert humidity percentage (0–100) to LEDs (0-8)
 void humidity_to_leds(float humidity) {
-
+    if (!s_led_enabled) {
+        // ignore humidity, keep LEDs off
+        return;
+    }
     // Limit humidity to valid bounds
     if (humidity < 0.0f)
         humidity = 0.0f;

@@ -26,6 +26,7 @@ Requires the following modules:
 */
 
 #include "network.h"
+#include "led_array.h"
 
 #include "pico/cyw43_arch.h"
 #include "lwip/tcp.h"
@@ -60,6 +61,18 @@ static err_t http_accept(void *arg, struct tcp_pcb *new_pcb, err_t err);
 static err_t http_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t err);
 static void  http_err(void *arg, err_t err);
 static err_t http_sent(void *arg, struct tcp_pcb *tpcb, u16_t len);
+
+static void handle_set_request(const char *param_name, const char *param_value) {
+    if (strcmp(param_name, "led") == 0) {
+        if (strcmp(param_value, "on") == 0) {
+            led_array_set_enabled(true);
+            printf("HTTP: LED enabled via web UI\n");
+        } else if (strcmp(param_value, "off") == 0) {
+            led_array_set_enabled(false);
+            printf("HTTP: LED disabled via web UI\n");
+        }
+    }
+}
 
 // Helper that closes a TCP connection
 static void http_connection_close(struct tcp_pcb *tpcb) {
@@ -149,9 +162,17 @@ static void send_http_response(struct tcp_pcb *tpcb) {
     snprintf(body, sizeof(body),
         "<!DOCTYPE html>\r\n"
         "<html>\r\n"
-        "<head><title>Microcontroller Home Humidity Sensor - Settings</title></head>\r\n"
-        "<body style=\"display:grid;place-items:center;height:100vh;margin:0\">\r\n" 
+        "<head><meta charset=\"UTF-8\">"
+        "<title>Microcontroller Home Humidity Sensor - Settings</title></head>\r\n"
+        "<body style=\"display:grid;place-items:center;height:100vh;margin:0\">\r\n"
         "<h1>Microcontroller Home Humidity Sensor</h1>\r\n"
+
+        "<p>LED control:</p>\r\n"
+        "<p>\r\n"
+        "<a href=\"/set?led=on\">Turn LEDs ON</a><br/>\r\n"
+        "<a href=\"/set?led=off\">Turn LEDs OFF</a>\r\n"
+        "</p>\r\n"
+
         "</body>\r\n"
         "</html>\r\n"
     );
@@ -168,19 +189,19 @@ static void send_http_response(struct tcp_pcb *tpcb) {
                               "\r\n",
                               body_len);
 
-    // Combine header and body
+    // Allocate a temporary buffer for full HTTP response (header + body)
     char response[512 + 256];
     size_t total_len = (size_t)header_len + body_len;
     if (total_len > sizeof(response)) {
         total_len = sizeof(response);
     }
 
+    // Copy header and then body after it
     memcpy(response, header, (size_t)header_len);
     memcpy(response + header_len, body, total_len - (size_t)header_len);
 
-    // Send data through lwIP's TCP API
+    // Send the full HTTP response over TCP using lwIP
     cyw43_arch_lwip_begin();
-
     err_t err = tcp_write(tpcb, response, (u16_t)total_len, TCP_WRITE_FLAG_COPY);
     if (err != ERR_OK) {
         printf("ERROR: tcp_write() failed: %d\n", err);
@@ -193,13 +214,14 @@ static void send_http_response(struct tcp_pcb *tpcb) {
     cyw43_arch_lwip_end();
 }
 
-// Callback for incomping HTTP request data
+
+// Callback for incoming HTTP request data
 static err_t http_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t err) {
     (void)arg;
 
     printf("HTTP: received data, err=%d, p=%p\n", err, (void*)p);
 
-    // If request is invalid or connection closes, clean up
+    // If request is invalid or connection closes, free buffer and close
     if ((err != ERR_OK) || (p == NULL)) {
         if (p) {
             cyw43_arch_lwip_begin();
@@ -210,12 +232,67 @@ static err_t http_recv(void *arg, struct tcp_pcb *tpcb, struct pbuf *p, err_t er
         return ERR_OK;
     }
 
-    // Free the incoming request packet
+    // Copy the entire incoming HTTP request into a local buffer
+    char req[512];
+    size_t copied = pbuf_copy_partial(p, req, sizeof(req) - 1, 0);
+    req[copied] = '\0';
+
+    // Free the lwIP packet buffer now that its data was copied
     cyw43_arch_lwip_begin();
     pbuf_free(p);
     cyw43_arch_lwip_end();
 
-    // Send HTML page in response
+    printf("HTTP: raw request:\n%s\n", req);
+
+    // Extract only the first line ("GET /path HTTP/1.1")
+    char *first_line = req;
+    char *line_end = strstr(first_line, "\r\n");
+    if (line_end) {
+        *line_end = '\0';  // terminate first line
+    }
+
+    printf("HTTP: first line: '%s'\n", first_line);
+
+    // Parse method, path, and version
+    char method[8]  = {0};
+    char path[128]  = {0};
+    char version[16]= {0};
+
+    if (sscanf(first_line, "%7s %127s %15s", method, path, version) == 3) {
+        printf("HTTP: parsed method=%s path=%s version=%s\n", method, path, version);
+
+        // Check if this request is for control endpoint
+        if (strncmp(path, "/set?", 5) == 0) {
+            const char *query = path + 5;  // points to "led=off"
+
+            char name[32]  = {0};
+            char value[32] = {0};
+
+            // Split "name=value" into separate strings
+            const char *eq = strchr(query, '=');
+            if (eq) {
+                size_t name_len = (size_t)(eq - query);
+                if (name_len >= sizeof(name)) name_len = sizeof(name) - 1;
+                memcpy(name, query, name_len);
+                name[name_len] = '\0';
+
+                const char *val_start = eq + 1;
+                size_t val_len = strlen(val_start);
+                if (val_len >= sizeof(value)) val_len = sizeof(value) - 1;
+                memcpy(value, val_start, val_len);
+                value[val_len] = '\0';
+
+                printf("HTTP: /set param: %s = %s\n", name, value);
+
+                // Apply the setting (LED on/off)
+                handle_set_request(name, value);
+            }
+        }
+    } else {
+        printf("HTTP: could not parse request line\n");
+    }
+
+    // Send the HTML page for any request
     send_http_response(tpcb);
 
     return ERR_OK;

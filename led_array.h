@@ -34,6 +34,15 @@ bool led_array_init(void);
 void humidity_to_leds(float humidity);
 
 /**
+ * @brief Enable or disable LED array output
+ *
+ * When disabled, all LEDs are turned off and humidity_to_leds()
+ * will not illuminate anything until re-enabled.
+ * @param enabled true to enable LED output, false to disable
+ */
+void led_array_set_enabled(bool enabled);
+
+/**
  * @brief Display a loading "ping pong" animation pattern
  *
  * Useful for initialization and booting states
