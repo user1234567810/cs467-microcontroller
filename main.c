@@ -110,6 +110,12 @@ int main() {
         // Use display_print from (display.c/.h)
         display_print(line1);
 
+        // Display temperature in fahrenheit on LCD
+        display_set_cursor(0, 1);
+        char line2[17];
+        snprintf(line2, sizeof(line2), "Temp: %.1fF", reading.temp_fahrenheit);
+        display_print(line2);
+
         // Update the LED array (led_array.c/.h)
         humidity_to_leds(reading.humidity);
     
