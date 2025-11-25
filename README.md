@@ -35,6 +35,15 @@ cmake --build build
 5. The Pico should mount as a storage device named `RPI-RP2` (or `RP2350` for a Pico2W).
 6. Drag and drop the `.uf2` file into that storage device.
 
+**Connecting to the Pico's WiFi Network**
+1. Connect to the Pico’s access point `PICO2W-AP`
+2. Configure your device with a **manual IP**:  
+  - IP: `192.168.4.2`  
+  - Subnet: `255.255.255.0`  
+  - Gateway: `192.168.4.1`  
+<img src="https://github.com/user-attachments/assets/b46418fd-890d-4e70-b5e6-0a3d28345e66" width="400">
+3. Open a browser and navigate to: `http://192.168.4.1/`
+
 ## Wiring Diagram
 ![Wiring Diagram](docs/wiring-diagram-v01.jpg)
 _Note: All GND pins on the Pico are electrically equivalent. The diagram shows specific GND pins for clarity, but any GND pin will work. Also, this wiring diagram is applicable to both Pico and Pico2W_
