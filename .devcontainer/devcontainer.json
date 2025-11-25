@@ -1,5 +1,5 @@
 {
-  "name": "Raspberry Pi Pico (C/C++) Dev Container",
+  "name": "Raspberry Pi Pico Dev Container",
   "build": { "dockerfile": "Dockerfile" },
 
   "customizations": {
@@ -7,17 +7,14 @@
       "extensions": [
         "ms-vscode.cpptools",
         "raspberry-pi.raspberry-pi-pico"
-      ],
-      "settings": {
-        "terminal.integrated.defaultProfile.linux": "bash"
-      }
+      ]
     }
   },
 
   "containerEnv": {
-    "PICO_SDK_PATH": "/workspaces/pico-sdk",
-    "PICO_BOARD": "pico"
+    "PICO_SDK_PATH": "/opt/pico-sdk",
+    "PICO_TOOLCHAIN_PATH": "/usr"
   },
 
-  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y gcc-arm-none-eabi libnewlib-arm-none-eabi cmake ninja-build build-essential python3 && if [ ! -d /workspaces/pico-sdk ]; then git clone --recurse-submodules https://github.com/raspberrypi/pico-sdk.git /workspaces/pico-sdk; fi && arm-none-eabi-gcc --version && cmake --version && python3 --version"
+  "postCreateCommand": "cmake -B build -S . -G Ninja -DPython3_EXECUTABLE=/usr/bin/python3 || cmake -B build -S ."
 }

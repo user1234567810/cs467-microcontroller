@@ -30,6 +30,11 @@ Assumes the following modules exist:
 #include "display.h"    // Display interface (display.c/.h)
 #include "led_array.h"  // LED array interface (led_array.c/.h)
 
+// Optional WiFi feature toggle (only use with Pico2W)
+#ifdef ENABLE_WIFI
+#include "network.h"
+#endif
+
 // Constants
 // Checks every 2 seconds, can be adjusted as needed.
 #define HUMIDITY_CHECK_INTERVAL_MS 2000
@@ -63,6 +68,20 @@ int main() {
         return 1;
     }
 
+// Start WiFi access point and web server
+// This block only runs when compile time flag ENABLE_WIFI is used
+#ifdef ENABLE_WIFI
+    if (!wifi_start_ap("PICO2W-AP", "capstone467")) {
+        printf("ERROR: Failed to start WiFi access point.\n");
+    } else {
+        if (!web_server_start(80)) {
+            printf("ERROR: Failed to start web server.\n");
+        } else {
+            printf("WiFi AP active. Connect to SSID 'PICO2W-AP' and open http://192.168.4.1/\n");
+        }
+    }
+#endif
+
     printf("Initialization complete. Entering main loop.\n");
 
     // Main loop
@@ -84,7 +103,7 @@ int main() {
 
         // Update the LED array (led_array.c/.h)
         humidity_to_leds(reading.humidity);
-
+    
         // Wait before next check
         sleep_ms(HUMIDITY_CHECK_INTERVAL_MS);
     }
