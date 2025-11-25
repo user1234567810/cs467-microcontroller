@@ -35,6 +35,8 @@ Assumes the following modules exist:
 #include "network.h"
 #endif
 
+float g_latest_humidity = 0.0f;
+
 // Constants
 // Checks every 2 seconds, can be adjusted as needed.
 #define HUMIDITY_CHECK_INTERVAL_MS 2000
@@ -90,6 +92,9 @@ int main() {
         dht_reading reading;
         // Read humidity and temperature from DHT20 (sensor.c/.h)
         read_from_dht(&reading);
+
+        g_latest_humidity = reading.humidity;
+
         // Print only humidity to output
         printf("Humidity: %.1f%%\n", reading.humidity);
         // Update the LCD display (display.c/.h)

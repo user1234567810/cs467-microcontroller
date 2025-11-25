@@ -35,9 +35,11 @@ Requires the following modules:
 #include <stdio.h>
 #include <string.h>
 
+extern float g_latest_humidity;
+
 #define HTTP_PORT_DEFAULT 80
-#define HTTP_BODY_MAX     1400
-#define HTTP_RESP_MAX     (HTTP_BODY_MAX + 256)
+#define HTTP_BODY_MAX     4096
+#define HTTP_RESP_MAX     (HTTP_BODY_MAX + 512)
 
 // TCP listener for the HTTP server
 static struct tcp_pcb *http_listener_pcb = NULL;
@@ -168,16 +170,18 @@ static void send_http_response(struct tcp_pcb *tpcb) {
     bool enabled = led_array_is_enabled();
 
     // Values inserted into the HTML template at runtime
-    const char *href         = enabled ? "/set?led=off" : "/set?led=on";
-    const char *toggle_class = enabled ? "toggle on"    : "toggle";
-    const char *status_text  = enabled ? "On"           : "Off";
+    const char *status_text  = enabled ? "On"  : "Off";
+    const char *toggle_href  = enabled ? "/set?led=off" : "/set?led=on";
+    const char *toggle_label = enabled ? "Turn LEDs Off" : "Turn LEDs On";
 
     // Format HTML page using template and values
     int body_len_int = snprintf(body, sizeof(body),
                                 PAGE_INDEX_HTML,
-                                href,
+                                g_latest_humidity,
                                 status_text,
-                                toggle_class);
+                                toggle_href,
+                                toggle_label);
+    printf("HTTP: body_len_int=%d (max=%d)\n", body_len_int, HTTP_BODY_MAX);
     if (body_len_int < 0) {
         body[0] = '\0';
     }
