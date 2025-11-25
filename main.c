@@ -35,6 +35,10 @@ Assumes the following modules exist:
 #include "network.h"
 #endif
 
+// Globals shared with network.c
+float g_latest_humidity = 0.0f;
+float g_latest_temp_f   = 0.0f;
+
 // Constants
 // Checks every 2 seconds, can be adjusted as needed.
 #define HUMIDITY_CHECK_INTERVAL_MS 2000
@@ -90,6 +94,11 @@ int main() {
         dht_reading reading;
         // Read humidity and temperature from DHT20 (sensor.c/.h)
         read_from_dht(&reading);
+
+        // Store latest readings for the web UI
+        g_latest_humidity = reading.humidity;
+        g_latest_temp_f   = reading.temp_fahrenheit;
+
         // Print only humidity to output
         printf("Humidity: %.1f%%\n", reading.humidity);
         // Update the LCD display (display.c/.h)
@@ -100,6 +109,12 @@ int main() {
         snprintf(line1, sizeof(line1), "Humidity: %.1f%%", reading.humidity);
         // Use display_print from (display.c/.h)
         display_print(line1);
+
+        // Display temperature in fahrenheit on LCD
+        display_set_cursor(0, 1);
+        char line2[17];
+        snprintf(line2, sizeof(line2), "Temp: %.1fF", reading.temp_fahrenheit);
+        display_print(line2);
 
         // Update the LED array (led_array.c/.h)
         humidity_to_leds(reading.humidity);
