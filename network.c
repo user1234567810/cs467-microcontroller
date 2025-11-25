@@ -36,6 +36,7 @@ Requires the following modules:
 #include <string.h>
 
 extern float g_latest_humidity;
+extern float g_latest_temp_f;
 
 #define HTTP_PORT_DEFAULT 80
 #define HTTP_BODY_MAX     4096
@@ -178,6 +179,7 @@ static void send_http_response(struct tcp_pcb *tpcb) {
     int body_len_int = snprintf(body, sizeof(body),
                                 PAGE_INDEX_HTML,
                                 g_latest_humidity,
+                                g_latest_temp_f,
                                 status_text,
                                 toggle_href,
                                 toggle_label);

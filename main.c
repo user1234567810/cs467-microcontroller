@@ -35,7 +35,9 @@ Assumes the following modules exist:
 #include "network.h"
 #endif
 
+// Globals shared with network.c
 float g_latest_humidity = 0.0f;
+float g_latest_temp_f   = 0.0f;
 
 // Constants
 // Checks every 2 seconds, can be adjusted as needed.
@@ -93,7 +95,9 @@ int main() {
         // Read humidity and temperature from DHT20 (sensor.c/.h)
         read_from_dht(&reading);
 
+        // Store latest readings for the web UI
         g_latest_humidity = reading.humidity;
+        g_latest_temp_f   = reading.temp_fahrenheit;
 
         // Print only humidity to output
         printf("Humidity: %.1f%%\n", reading.humidity);
